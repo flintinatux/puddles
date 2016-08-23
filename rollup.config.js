@@ -5,8 +5,7 @@ import uglify      from 'rollup-plugin-uglify'
 
 export default {
   entry: 'index.js',
-  format: 'iife',
-  moduleName: 'puddles',
+  format: 'cjs',
   plugins: [
     commonjs(),
     nodeResolve({
