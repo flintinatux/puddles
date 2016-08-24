@@ -19,12 +19,22 @@
   },
   "homepage": "https://github.com/flintinatux/puddles#readme",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "build": "browserify -s p index.js | buble > dist/puddles.js",
+    "clean": "rm -rf dist/*",
+    "postbuild": "uglifyjs dist/puddles.js -c -m > dist/puddles.min.js",
+    "prebuild": "npm run clean && mkdir -p dist"
+  },
   "dependencies": {
     "debug": "^2.2.0",
     "flyd": "^0.2.2",
     "path-to-regexp": "^1.5.3",
     "ramda": "^0.22.1",
     "snabbdom": "^0.5.1"
+  },
+  "devDependencies": {
+    "browserify": "^13.1.0",
+    "buble": "^0.13.1",
+    "uglify-js": "^2.7.3"
   }
 }

@@ -1,6 +1,9 @@
-exports.action  = require('./lib/action')
-exports.combine = require('./lib/combine')
-exports.h       = require('snabbdom/h')
-exports.handle  = require('./lib/handle')
-exports.mount   = require('./lib/mount')
-exports.route   = require('./lib/route')
+const p = require('snabbdom/h')
+
+p.action  = require('./lib/action')
+p.combine = require('./lib/combine')
+p.handle  = require('./lib/handle')
+p.mount   = require('./lib/mount')
+p.route   = require('./lib/route')
+
+module.exports = p
