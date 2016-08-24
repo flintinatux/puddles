@@ -19,23 +19,12 @@
   },
   "homepage": "https://github.com/flintinatux/puddles#readme",
   "main": "index.js",
-  "scripts": {
-    "build": "rollup -c -o dist/puddles.js",
-    "clean": "rm -rf dist",
-    "prebuild": "npm run clean && mkdir -p dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "dependencies": {
     "debug": "^2.2.0",
     "flyd": "^0.2.2",
+    "path-to-regexp": "^1.5.3",
     "ramda": "^0.22.1",
     "snabbdom": "^0.5.1"
-  },
-  "devDependencies": {
-    "rollup": "^0.34.10",
-    "rollup-plugin-buble": "^0.13.0",
-    "rollup-plugin-commonjs": "^3.3.1",
-    "rollup-plugin-node-resolve": "^2.0.0",
-    "rollup-plugin-uglify": "^1.0.1"
   }
 }
