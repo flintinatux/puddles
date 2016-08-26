@@ -31,7 +31,7 @@ The `puddles` api is intentionally designed with a small footprint, and was insp
 
     :: (String, Object, [Vnode]) -> Vnode
 
-##### Parameters
+#### Parameters
 
 - String `selector` <br/>
   CSS selector defining element tag, class, and/or id.
@@ -40,7 +40,7 @@ The `puddles` api is intentionally designed with a small footprint, and was insp
 - Array `children` <br/>
   (optional) List of child vnodes.
 
-##### Returns
+#### Returns
 
 - Vnode<br/>
   Learn more about the vnode format [here](https://github.com/paldepind/snabbdom#virtual-node).
@@ -51,14 +51,14 @@ The `p` hyperscript function is a direct export of `snabbdom/h`, so I recommend 
 
     :: (String, *) -> Object
 
-##### Parameters
+#### Parameters
 
 - string `type` <br/>
   The action type, traditionally uppercase, but that is not enforced.
 - * `payload` <br/>
   The action payload, can be any serializable value, or a `thenable` or `forkable` monad.
 
-##### Returns
+#### Returns
 
 - Object <br/>
   An [FSA-compliant](https://github.com/acdlite/flux-standard-action) action with the format `{ type, payload }`.
@@ -82,12 +82,12 @@ sendEmail({ to: 'example@email.com' })
 
     :: Object -> function
 
-##### Parameters
+#### Parameters
 
 - Object `reducers` <br/>
   Map of top-level state object keys to child reducers.
 
-##### Returns
+#### Returns
 
 - function <br/>
   New reducer that calls every child reducer, and gathers their results into a single state object.
@@ -117,14 +117,14 @@ reducer(undefined, {})
 
     :: (*, Object) -> function
 
-##### Parameters
+#### Parameters
 
 - * `init` <br/>
   Initial state, used if reducer is called with `undefined` state.
 - Object `handlers` <br/>
   Map of action types to individual reducer functions with the signature `(state, payload)`.
 
-##### Returns
+#### Returns
 
 - function <br/>
   A reducer that handles multiple action types.
