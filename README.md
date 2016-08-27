@@ -49,7 +49,7 @@ The `p` hyperscript function is a direct export of `snabbdom/h`, so I recommend 
 
 ## p.action
 
-    :: (String, *) -> Object
+    :: String -> a -> Object
 
 #### Parameters
 
@@ -80,7 +80,7 @@ sendEmail({ to: 'example@email.com' })
 
 ## p.combine
 
-    :: Object -> function
+    :: Object -> (a, Object) -> a
 
 #### Parameters
 
@@ -115,7 +115,7 @@ reducer(undefined, {})
 
 ## p.handle
 
-    :: (*, Object) -> function
+    :: (a, Object) -> (a, Object) -> a
 
 #### Parameters
 
@@ -157,12 +157,137 @@ state = reducer(state, p.action('NOT_HANDLED', null))
 
 ## p.mount
 
-    :: (Element, Object) -> Object
+    :: (Element, (a -> Vnode), ((a, Object) -> a)) -> Object
 
-TODO
+#### Parameters
+
+- Element `root` <br/>
+  Root element in which to mount the app.
+- function `view` <br/>
+  Pure view function that maps application state to a vnode tree.
+- function `reducer` <br/>
+  (optional) Reducer function that returns a new state based on an action. Defaults to [`identity`](http://devdocs.io/ramda/index#identity).
+
+#### Returns
+
+- Object <br/>
+  An external interface object with `dispatch` and `teardown` functions.
+
+TODO: details
+
+```js
+const assoc   = require('ramda/src/assoc')
+const compose = require('ramda/src/compose')
+const flip    = require('ramda/src/flip')
+const p       = require('puddles')
+const path    = require('ramda/src/path')
+
+const setName = p.action('SET_NAME')
+const value   = path(['target', 'value'])
+
+const init = { name: 'world' }
+
+const reducer = p.handle(init, {
+  SET_NAME: flip(assoc('name'))
+})
+
+const view = state =>
+  p('div.example', [
+    p('label', 'Name'),
+
+    p('input', {
+      on: { input: compose(setName, value) },
+      props: { value: state.name }
+    }),
+
+    p('div.message', `Hello ${state.name}!`)
+  ])
+
+const root = document.getElementById('root')
+
+p.mount(root, view, reducer)
+```
 
 ## p.route
 
-    :: (String, Object) -> Vnode
+    :: (String, Object) -> a -> Vnode
 
-TODO
+#### Parameters
+
+- String `initial` <br/>
+  The route to redirect to if none exists (ie: `location.hash === ''`).
+- Object `routes` <br/>
+  Map of express-style route patterns to `view` functions.
+
+#### Returns
+
+- function <br/>
+  A parent `view` function that renders the child view matching the current route.
+
+TODO: details
+
+```js
+const p = require('puddles')
+
+// these reducers are implemented elsewhere...
+const user  = require('../ducks/user')
+const users = require('../ducks/users')
+
+const { href } = p.route
+
+const reducer = p.combine({ route: p.route.reducer, user, users })
+
+const layout = content => state =>
+  p('div.layout', [
+    p('nav.header', [
+      p('a.tab', {
+        attrs: { href: href('/') }
+      }, 'Home'),
+
+      p('a.tab', {
+        attrs: { href: href(`/profiles/${state.user.id}`) }
+      }, 'My profile')
+    ]),
+
+    p('section.content', [ content(state) ])
+  ])
+
+const Home = state =>
+  p('div.home', [
+    p('h1.title', 'Home')
+  ])
+
+const Profile = state =>
+  p('div.profile', [
+    p('h1.title', `Profile for ${state.users[state.route.params.id].name}`)
+  ])
+
+const view = p.route('/', {
+  '/':             layout(Home),
+  '/profiles/:id': layout(Profile)
+})
+
+const root = document.getElementById('root')
+
+p.mount(root, view, reducer)
+```
+
+In the example above, when the user first visits, the `layout(Home)` view will render, but after clicking on the `My profile` tab, this will be rendered:
+
+```html
+<div id='root'>
+  <div id='router'>
+    <div class='layout'>
+      <nav class='header'>
+        <a class='tab' href='#!/'>Home</a>
+        <a class='tab' href='#!/profiles/123'>My profile</a>
+      </nav>
+      <section class='content'>
+        <div class='profile'>
+          <h1 class='title'>Profile for John Smith</h1>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+```
