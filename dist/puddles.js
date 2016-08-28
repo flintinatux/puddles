@@ -15,7 +15,7 @@ reducer.routeChanged = action(ROUTE_CHANGED)
 
 module.exports = reducer
 
-},{"../lib/action":3,"../lib/handle":6,"ramda/src/concat":25}],2:[function(require,module,exports){
+},{"../lib/action":3,"../lib/handle":6,"ramda/src/concat":20}],2:[function(require,module,exports){
 var p = require('snabbdom/h')
 
 p.action  = require('./lib/action')
@@ -26,14 +26,14 @@ p.route   = require('./lib/route')
 
 module.exports = p
 
-},{"./lib/action":3,"./lib/combine":4,"./lib/handle":6,"./lib/mount":8,"./lib/route":9,"snabbdom/h":77}],3:[function(require,module,exports){
+},{"./lib/action":3,"./lib/combine":4,"./lib/handle":6,"./lib/mount":8,"./lib/route":9,"snabbdom/h":75}],3:[function(require,module,exports){
 var curry = require('ramda/src/curry')
 
 var action = curry(function (type, payload) { return ({ type: type, payload: payload }); })
 
 module.exports = action
 
-},{"ramda/src/curry":26}],4:[function(require,module,exports){
+},{"ramda/src/curry":21}],4:[function(require,module,exports){
 var mapObj = require('ramda/src/mapObjIndexed')
 
 var combine = function (reducers) { return function (state, action) {
@@ -44,7 +44,7 @@ var combine = function (reducers) { return function (state, action) {
 
 module.exports = combine
 
-},{"ramda/src/mapObjIndexed":67}],5:[function(require,module,exports){
+},{"ramda/src/mapObjIndexed":62}],5:[function(require,module,exports){
 var compose = require('ramda/src/compose')
 var events  = require('snabbdom/modules/eventlisteners')
 
@@ -70,7 +70,7 @@ module.exports = function (dispatch) { return ({
   update: wrap('update', dispatch)
 }); }
 
-},{"ramda/src/compose":24,"snabbdom/modules/eventlisteners":82}],6:[function(require,module,exports){
+},{"ramda/src/compose":19,"snabbdom/modules/eventlisteners":80}],6:[function(require,module,exports){
 var handle = function (init, reducers) { return function (state, ref) {
       if ( state === void 0 ) state=init;
       var type = ref.type;
@@ -110,20 +110,16 @@ var action = require('./action')
 var events = require('./events')
 var hooks  = require('./hooks')
 var ref$1 = require('./util');
-var debug = ref$1.debug;
 var error = ref$1.error;
 var forkable = ref$1.forkable;
 var thenable = ref$1.thenable;
 
-var mount = function (root, ref) {
-  var reducer = ref.reducer; if ( reducer === void 0 ) reducer = I;
-  var view = ref.view;
+var mount = function (root, view, reducer) {
+  if ( reducer === void 0 ) reducer=I;
 
   var dispatch = flyd.stream()
   var state = flyd.combine(reduceWith(reducer), [dispatch])
   state(reducer(undefined, {}))
-  dispatch.map(debug('dispatch'))
-  state.map(debug('state'))
   flyd.scan(patch(dispatch), root, state.map(view))
 
   function teardown() {
@@ -131,7 +127,7 @@ var mount = function (root, ref) {
     dispatch.end(true)
   }
 
-  return { dispatch: dispatch, teardown: teardown }
+  return { dispatch: dispatch, state: state, teardown: teardown }
 }
 
 var patch = function (dispatch) { return init([ attrs, classes, events(dispatch), props, style, hooks(dispatch) ]); }
@@ -158,22 +154,23 @@ var reduceWith = function (reducer) { return function (dispatch, state) {
 
 module.exports = mount
 
-},{"./action":3,"./events":5,"./hooks":7,"./util":10,"flyd":13,"ramda/src/identity":31,"snabbdom":85,"snabbdom/modules/attributes":80,"snabbdom/modules/class":81,"snabbdom/modules/props":83,"snabbdom/modules/style":84}],9:[function(require,module,exports){
+},{"./action":3,"./events":5,"./hooks":7,"./util":10,"flyd":11,"ramda/src/identity":26,"snabbdom":83,"snabbdom/modules/attributes":78,"snabbdom/modules/class":79,"snabbdom/modules/props":81,"snabbdom/modules/style":82}],9:[function(require,module,exports){
 var compose   = require('ramda/src/compose')
 var concat    = require('ramda/src/concat')
 var flyd      = require('flyd')
 var h         = require('snabbdom/h')
-var pathToReg = require('path-to-regexp')
+var match     = require('ramda/src/match')
+var replace   = require('ramda/src/replace')
+var zipObj    = require('ramda/src/zipObj')
 
 var reducer = require('../ducks/route')
 
-var ref = Object.prototype;
-var hasOwnProperty = ref.hasOwnProperty;
-;
 var routeChanged = reducer.routeChanged;
 var prefix = '#!'
 
 var hash = function (e) { return location.hash.slice(prefix.length); }
+
+var pathToRegexp = function (pattern) { return new RegExp('^' + pattern.replace(/:[^\/]+?\.{3}/g, '(.*?)').replace(/:[^\/]+/g, '([^\\/]+)') + '\/?$'); }
 
 var route = function (initial, routes) {
   if ( routes === void 0 ) routes={};
@@ -187,22 +184,10 @@ var route = function (initial, routes) {
     }
 
     for (var pattern in routes) {
-      var keys = [],
-          re = pathToReg(pattern, keys),
-          m  = re.exec(path),
-          params = {}
-
-      if (m) {
-        for (var i = 1; i < m.length; i++) {
-          var key  = keys[i - 1],
-              prop = key.name,
-              val  = decodeURIComponent(m[i])
-
-          if (val !== undefined || !(hasOwnProperty.call(params, prop))) {
-            params[prop] = val
-          }
-        }
-
+      var vals = match(pathToRegexp(pattern), path)
+      if (vals.length) {
+        var keys = match(/:[^\/]+/g, pattern).map(replace(/:|\./g, ''))
+        var params = zipObj(keys, vals.slice(1).map(decodeURIComponent))
         return { params: params, path: path, pattern: pattern }
       }
     }
@@ -217,7 +202,7 @@ var route = function (initial, routes) {
   var route = flyd.combine(matchRoute, [url])
 
   var attach = function (dispatch) {
-    dispatch(routeChanged(route() || {}))
+    dispatch(routeChanged(route() || { params: {} }))
     route.map(compose(dispatch, routeChanged))
   }
 
@@ -233,14 +218,8 @@ route.reducer = reducer
 
 module.exports = route
 
-},{"../ducks/route":1,"flyd":13,"path-to-regexp":22,"ramda/src/compose":24,"ramda/src/concat":25,"snabbdom/h":77}],10:[function(require,module,exports){
-var compose = require('ramda/src/compose')
-var Debug   = require('debug')
-var tap     = require('ramda/src/tap')
-
-var stringify = function (x) { return typeof x === 'function' ? ("[function " + (x.name) + "]") : JSON.stringify(x); }
-
-exports.debug = function (label) { return tap(compose(Debug(label), stringify)); }
+},{"../ducks/route":1,"flyd":11,"ramda/src/compose":19,"ramda/src/concat":20,"ramda/src/match":63,"ramda/src/replace":67,"ramda/src/zipObj":74,"snabbdom/h":75}],10:[function(require,module,exports){
+var tap = require('ramda/src/tap')
 
 exports.error = tap(console.error.bind(console))
 
@@ -249,376 +228,7 @@ exports.log = tap(console.log.bind(console))
 exports.forkable = function (x) { return x && typeof x.fork === 'function'; }
 exports.thenable = function (x) { return x && typeof x.then === 'function'; }
 
-},{"debug":11,"ramda/src/compose":24,"ramda/src/tap":74}],11:[function(require,module,exports){
-
-/**
- * This is the web browser implementation of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = require('./debug');
-exports.log = log;
-exports.formatArgs = formatArgs;
-exports.save = save;
-exports.load = load;
-exports.useColors = useColors;
-exports.storage = 'undefined' != typeof chrome
-               && 'undefined' != typeof chrome.storage
-                  ? chrome.storage.local
-                  : localstorage();
-
-/**
- * Colors.
- */
-
-exports.colors = [
-  'lightseagreen',
-  'forestgreen',
-  'goldenrod',
-  'dodgerblue',
-  'darkorchid',
-  'crimson'
-];
-
-/**
- * Currently only WebKit-based Web Inspectors, Firefox >= v31,
- * and the Firebug extension (any Firefox version) are known
- * to support "%c" CSS customizations.
- *
- * TODO: add a `localStorage` variable to explicitly enable/disable colors
- */
-
-function useColors() {
-  // is webkit? http://stackoverflow.com/a/16459606/376773
-  return ('WebkitAppearance' in document.documentElement.style) ||
-    // is firebug? http://stackoverflow.com/a/398120/376773
-    (window.console && (console.firebug || (console.exception && console.table))) ||
-    // is firefox >= v31?
-    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
-}
-
-/**
- * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
- */
-
-exports.formatters.j = function(v) {
-  return JSON.stringify(v);
-};
-
-
-/**
- * Colorize log arguments if enabled.
- *
- * @api public
- */
-
-function formatArgs() {
-  var args = arguments;
-  var useColors = this.useColors;
-
-  args[0] = (useColors ? '%c' : '')
-    + this.namespace
-    + (useColors ? ' %c' : ' ')
-    + args[0]
-    + (useColors ? '%c ' : ' ')
-    + '+' + exports.humanize(this.diff);
-
-  if (!useColors) return args;
-
-  var c = 'color: ' + this.color;
-  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
-
-  // the final "%c" is somewhat tricky, because there could be other
-  // arguments passed either before or after the %c, so we need to
-  // figure out the correct index to insert the CSS into
-  var index = 0;
-  var lastC = 0;
-  args[0].replace(/%[a-z%]/g, function(match) {
-    if ('%%' === match) return;
-    index++;
-    if ('%c' === match) {
-      // we only are interested in the *last* %c
-      // (the user may have provided their own)
-      lastC = index;
-    }
-  });
-
-  args.splice(lastC, 0, c);
-  return args;
-}
-
-/**
- * Invokes `console.log()` when available.
- * No-op when `console.log` is not a "function".
- *
- * @api public
- */
-
-function log() {
-  // this hackery is required for IE8/9, where
-  // the `console.log` function doesn't have 'apply'
-  return 'object' === typeof console
-    && console.log
-    && Function.prototype.apply.call(console.log, console, arguments);
-}
-
-/**
- * Save `namespaces`.
- *
- * @param {String} namespaces
- * @api private
- */
-
-function save(namespaces) {
-  try {
-    if (null == namespaces) {
-      exports.storage.removeItem('debug');
-    } else {
-      exports.storage.debug = namespaces;
-    }
-  } catch(e) {}
-}
-
-/**
- * Load `namespaces`.
- *
- * @return {String} returns the previously persisted debug modes
- * @api private
- */
-
-function load() {
-  var r;
-  try {
-    r = exports.storage.debug;
-  } catch(e) {}
-  return r;
-}
-
-/**
- * Enable namespaces listed in `localStorage.debug` initially.
- */
-
-exports.enable(load());
-
-/**
- * Localstorage attempts to return the localstorage.
- *
- * This is necessary because safari throws
- * when a user disables cookies/localstorage
- * and you attempt to access it.
- *
- * @return {LocalStorage}
- * @api private
- */
-
-function localstorage(){
-  try {
-    return window.localStorage;
-  } catch (e) {}
-}
-
-},{"./debug":12}],12:[function(require,module,exports){
-
-/**
- * This is the common logic for both the Node.js and web browser
- * implementations of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = debug;
-exports.coerce = coerce;
-exports.disable = disable;
-exports.enable = enable;
-exports.enabled = enabled;
-exports.humanize = require('ms');
-
-/**
- * The currently active debug mode names, and names to skip.
- */
-
-exports.names = [];
-exports.skips = [];
-
-/**
- * Map of special "%n" handling functions, for the debug "format" argument.
- *
- * Valid key names are a single, lowercased letter, i.e. "n".
- */
-
-exports.formatters = {};
-
-/**
- * Previously assigned color.
- */
-
-var prevColor = 0;
-
-/**
- * Previous log timestamp.
- */
-
-var prevTime;
-
-/**
- * Select a color.
- *
- * @return {Number}
- * @api private
- */
-
-function selectColor() {
-  return exports.colors[prevColor++ % exports.colors.length];
-}
-
-/**
- * Create a debugger with the given `namespace`.
- *
- * @param {String} namespace
- * @return {Function}
- * @api public
- */
-
-function debug(namespace) {
-
-  // define the `disabled` version
-  function disabled() {
-  }
-  disabled.enabled = false;
-
-  // define the `enabled` version
-  function enabled() {
-
-    var self = enabled;
-
-    // set `diff` timestamp
-    var curr = +new Date();
-    var ms = curr - (prevTime || curr);
-    self.diff = ms;
-    self.prev = prevTime;
-    self.curr = curr;
-    prevTime = curr;
-
-    // add the `color` if not set
-    if (null == self.useColors) self.useColors = exports.useColors();
-    if (null == self.color && self.useColors) self.color = selectColor();
-
-    var args = Array.prototype.slice.call(arguments);
-
-    args[0] = exports.coerce(args[0]);
-
-    if ('string' !== typeof args[0]) {
-      // anything else let's inspect with %o
-      args = ['%o'].concat(args);
-    }
-
-    // apply any `formatters` transformations
-    var index = 0;
-    args[0] = args[0].replace(/%([a-z%])/g, function(match, format) {
-      // if we encounter an escaped % then don't increase the array index
-      if (match === '%%') return match;
-      index++;
-      var formatter = exports.formatters[format];
-      if ('function' === typeof formatter) {
-        var val = args[index];
-        match = formatter.call(self, val);
-
-        // now we need to remove `args[index]` since it's inlined in the `format`
-        args.splice(index, 1);
-        index--;
-      }
-      return match;
-    });
-
-    if ('function' === typeof exports.formatArgs) {
-      args = exports.formatArgs.apply(self, args);
-    }
-    var logFn = enabled.log || exports.log || console.log.bind(console);
-    logFn.apply(self, args);
-  }
-  enabled.enabled = true;
-
-  var fn = exports.enabled(namespace) ? enabled : disabled;
-
-  fn.namespace = namespace;
-
-  return fn;
-}
-
-/**
- * Enables a debug mode by namespaces. This can include modes
- * separated by a colon and wildcards.
- *
- * @param {String} namespaces
- * @api public
- */
-
-function enable(namespaces) {
-  exports.save(namespaces);
-
-  var split = (namespaces || '').split(/[\s,]+/);
-  var len = split.length;
-
-  for (var i = 0; i < len; i++) {
-    if (!split[i]) continue; // ignore empty strings
-    namespaces = split[i].replace(/\*/g, '.*?');
-    if (namespaces[0] === '-') {
-      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-    } else {
-      exports.names.push(new RegExp('^' + namespaces + '$'));
-    }
-  }
-}
-
-/**
- * Disable debug output.
- *
- * @api public
- */
-
-function disable() {
-  exports.enable('');
-}
-
-/**
- * Returns true if the given mode name is enabled, false otherwise.
- *
- * @param {String} name
- * @return {Boolean}
- * @api public
- */
-
-function enabled(name) {
-  var i, len;
-  for (i = 0, len = exports.skips.length; i < len; i++) {
-    if (exports.skips[i].test(name)) {
-      return false;
-    }
-  }
-  for (i = 0, len = exports.names.length; i < len; i++) {
-    if (exports.names[i].test(name)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Coerce `val`.
- *
- * @param {Mixed} val
- * @return {Mixed}
- * @api private
- */
-
-function coerce(val) {
-  if (val instanceof Error) return val.stack || val.message;
-  return val;
-}
-
-},{"ms":21}],13:[function(require,module,exports){
+},{"ramda/src/tap":71}],11:[function(require,module,exports){
 'use strict';
 
 var curryN = require('ramda/src/curryN');
@@ -1246,7 +856,7 @@ StreamTransformer.prototype['@@transducer/step'] = function(s, v) { return v; };
 
 module.exports = flyd;
 
-},{"ramda/src/curryN":14}],14:[function(require,module,exports){
+},{"ramda/src/curryN":12}],12:[function(require,module,exports){
 var _arity = require('./internal/_arity');
 var _curry1 = require('./internal/_curry1');
 var _curry2 = require('./internal/_curry2');
@@ -1302,7 +912,7 @@ module.exports = _curry2(function curryN(length, fn) {
   return _arity(length, _curryN(length, [], fn));
 });
 
-},{"./internal/_arity":15,"./internal/_curry1":16,"./internal/_curry2":17,"./internal/_curryN":18}],15:[function(require,module,exports){
+},{"./internal/_arity":13,"./internal/_curry1":14,"./internal/_curry2":15,"./internal/_curryN":16}],13:[function(require,module,exports){
 module.exports = function _arity(n, fn) {
   /* eslint-disable no-unused-vars */
   switch (n) {
@@ -1321,7 +931,7 @@ module.exports = function _arity(n, fn) {
   }
 };
 
-},{}],16:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var _isPlaceholder = require('./_isPlaceholder');
 
 
@@ -1343,7 +953,7 @@ module.exports = function _curry1(fn) {
   };
 };
 
-},{"./_isPlaceholder":19}],17:[function(require,module,exports){
+},{"./_isPlaceholder":17}],15:[function(require,module,exports){
 var _curry1 = require('./_curry1');
 var _isPlaceholder = require('./_isPlaceholder');
 
@@ -1373,7 +983,7 @@ module.exports = function _curry2(fn) {
   };
 };
 
-},{"./_curry1":16,"./_isPlaceholder":19}],18:[function(require,module,exports){
+},{"./_curry1":14,"./_isPlaceholder":17}],16:[function(require,module,exports){
 var _arity = require('./_arity');
 var _isPlaceholder = require('./_isPlaceholder');
 
@@ -1417,574 +1027,14 @@ module.exports = function _curryN(length, received, fn) {
   };
 };
 
-},{"./_arity":15,"./_isPlaceholder":19}],19:[function(require,module,exports){
+},{"./_arity":13,"./_isPlaceholder":17}],17:[function(require,module,exports){
 module.exports = function _isPlaceholder(a) {
   return a != null &&
          typeof a === 'object' &&
          a['@@functional/placeholder'] === true;
 };
 
-},{}],20:[function(require,module,exports){
-module.exports = Array.isArray || function (arr) {
-  return Object.prototype.toString.call(arr) == '[object Array]';
-};
-
-},{}],21:[function(require,module,exports){
-/**
- * Helpers.
- */
-
-var s = 1000;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var y = d * 365.25;
-
-/**
- * Parse or format the given `val`.
- *
- * Options:
- *
- *  - `long` verbose formatting [false]
- *
- * @param {String|Number} val
- * @param {Object} options
- * @return {String|Number}
- * @api public
- */
-
-module.exports = function(val, options){
-  options = options || {};
-  if ('string' == typeof val) return parse(val);
-  return options.long
-    ? long(val)
-    : short(val);
-};
-
-/**
- * Parse the given `str` and return milliseconds.
- *
- * @param {String} str
- * @return {Number}
- * @api private
- */
-
-function parse(str) {
-  str = '' + str;
-  if (str.length > 10000) return;
-  var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
-  if (!match) return;
-  var n = parseFloat(match[1]);
-  var type = (match[2] || 'ms').toLowerCase();
-  switch (type) {
-    case 'years':
-    case 'year':
-    case 'yrs':
-    case 'yr':
-    case 'y':
-      return n * y;
-    case 'days':
-    case 'day':
-    case 'd':
-      return n * d;
-    case 'hours':
-    case 'hour':
-    case 'hrs':
-    case 'hr':
-    case 'h':
-      return n * h;
-    case 'minutes':
-    case 'minute':
-    case 'mins':
-    case 'min':
-    case 'm':
-      return n * m;
-    case 'seconds':
-    case 'second':
-    case 'secs':
-    case 'sec':
-    case 's':
-      return n * s;
-    case 'milliseconds':
-    case 'millisecond':
-    case 'msecs':
-    case 'msec':
-    case 'ms':
-      return n;
-  }
-}
-
-/**
- * Short format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function short(ms) {
-  if (ms >= d) return Math.round(ms / d) + 'd';
-  if (ms >= h) return Math.round(ms / h) + 'h';
-  if (ms >= m) return Math.round(ms / m) + 'm';
-  if (ms >= s) return Math.round(ms / s) + 's';
-  return ms + 'ms';
-}
-
-/**
- * Long format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function long(ms) {
-  return plural(ms, d, 'day')
-    || plural(ms, h, 'hour')
-    || plural(ms, m, 'minute')
-    || plural(ms, s, 'second')
-    || ms + ' ms';
-}
-
-/**
- * Pluralization helper.
- */
-
-function plural(ms, n, name) {
-  if (ms < n) return;
-  if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
-  return Math.ceil(ms / n) + ' ' + name + 's';
-}
-
-},{}],22:[function(require,module,exports){
-var isarray = require('isarray')
-
-/**
- * Expose `pathToRegexp`.
- */
-module.exports = pathToRegexp
-module.exports.parse = parse
-module.exports.compile = compile
-module.exports.tokensToFunction = tokensToFunction
-module.exports.tokensToRegExp = tokensToRegExp
-
-/**
- * The main path matching regexp utility.
- *
- * @type {RegExp}
- */
-var PATH_REGEXP = new RegExp([
-  // Match escaped characters that would otherwise appear in future matches.
-  // This allows the user to escape special characters that won't transform.
-  '(\\\\.)',
-  // Match Express-style parameters and un-named parameters with a prefix
-  // and optional suffixes. Matches appear as:
-  //
-  // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
-  // "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
-  // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
-  '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^\\\\()])+)\\))?|\\(((?:\\\\.|[^\\\\()])+)\\))([+*?])?|(\\*))'
-].join('|'), 'g')
-
-/**
- * Parse a string for the raw tokens.
- *
- * @param  {string} str
- * @return {!Array}
- */
-function parse (str) {
-  var tokens = []
-  var key = 0
-  var index = 0
-  var path = ''
-  var res
-
-  while ((res = PATH_REGEXP.exec(str)) != null) {
-    var m = res[0]
-    var escaped = res[1]
-    var offset = res.index
-    path += str.slice(index, offset)
-    index = offset + m.length
-
-    // Ignore already escaped sequences.
-    if (escaped) {
-      path += escaped[1]
-      continue
-    }
-
-    var next = str[index]
-    var prefix = res[2]
-    var name = res[3]
-    var capture = res[4]
-    var group = res[5]
-    var modifier = res[6]
-    var asterisk = res[7]
-
-    // Push the current path onto the tokens.
-    if (path) {
-      tokens.push(path)
-      path = ''
-    }
-
-    var partial = prefix != null && next != null && next !== prefix
-    var repeat = modifier === '+' || modifier === '*'
-    var optional = modifier === '?' || modifier === '*'
-    var delimiter = res[2] || '/'
-    var pattern = capture || group || (asterisk ? '.*' : '[^' + delimiter + ']+?')
-
-    tokens.push({
-      name: name || key++,
-      prefix: prefix || '',
-      delimiter: delimiter,
-      optional: optional,
-      repeat: repeat,
-      partial: partial,
-      asterisk: !!asterisk,
-      pattern: escapeGroup(pattern)
-    })
-  }
-
-  // Match any characters still remaining.
-  if (index < str.length) {
-    path += str.substr(index)
-  }
-
-  // If the path exists, push it onto the end.
-  if (path) {
-    tokens.push(path)
-  }
-
-  return tokens
-}
-
-/**
- * Compile a string to a template function for the path.
- *
- * @param  {string}             str
- * @return {!function(Object=, Object=)}
- */
-function compile (str) {
-  return tokensToFunction(parse(str))
-}
-
-/**
- * Prettier encoding of URI path segments.
- *
- * @param  {string}
- * @return {string}
- */
-function encodeURIComponentPretty (str) {
-  return encodeURI(str).replace(/[\/?#]/g, function (c) {
-    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
-  })
-}
-
-/**
- * Encode the asterisk parameter. Similar to `pretty`, but allows slashes.
- *
- * @param  {string}
- * @return {string}
- */
-function encodeAsterisk (str) {
-  return encodeURI(str).replace(/[?#]/g, function (c) {
-    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
-  })
-}
-
-/**
- * Expose a method for transforming tokens into the path function.
- */
-function tokensToFunction (tokens) {
-  // Compile all the tokens into regexps.
-  var matches = new Array(tokens.length)
-
-  // Compile all the patterns before compilation.
-  for (var i = 0; i < tokens.length; i++) {
-    if (typeof tokens[i] === 'object') {
-      matches[i] = new RegExp('^(?:' + tokens[i].pattern + ')$')
-    }
-  }
-
-  return function (obj, opts) {
-    var path = ''
-    var data = obj || {}
-    var options = opts || {}
-    var encode = options.pretty ? encodeURIComponentPretty : encodeURIComponent
-
-    for (var i = 0; i < tokens.length; i++) {
-      var token = tokens[i]
-
-      if (typeof token === 'string') {
-        path += token
-
-        continue
-      }
-
-      var value = data[token.name]
-      var segment
-
-      if (value == null) {
-        if (token.optional) {
-          // Prepend partial segment prefixes.
-          if (token.partial) {
-            path += token.prefix
-          }
-
-          continue
-        } else {
-          throw new TypeError('Expected "' + token.name + '" to be defined')
-        }
-      }
-
-      if (isarray(value)) {
-        if (!token.repeat) {
-          throw new TypeError('Expected "' + token.name + '" to not repeat, but received `' + JSON.stringify(value) + '`')
-        }
-
-        if (value.length === 0) {
-          if (token.optional) {
-            continue
-          } else {
-            throw new TypeError('Expected "' + token.name + '" to not be empty')
-          }
-        }
-
-        for (var j = 0; j < value.length; j++) {
-          segment = encode(value[j])
-
-          if (!matches[i].test(segment)) {
-            throw new TypeError('Expected all "' + token.name + '" to match "' + token.pattern + '", but received `' + JSON.stringify(segment) + '`')
-          }
-
-          path += (j === 0 ? token.prefix : token.delimiter) + segment
-        }
-
-        continue
-      }
-
-      segment = token.asterisk ? encodeAsterisk(value) : encode(value)
-
-      if (!matches[i].test(segment)) {
-        throw new TypeError('Expected "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
-      }
-
-      path += token.prefix + segment
-    }
-
-    return path
-  }
-}
-
-/**
- * Escape a regular expression string.
- *
- * @param  {string} str
- * @return {string}
- */
-function escapeString (str) {
-  return str.replace(/([.+*?=^!:${}()[\]|\/\\])/g, '\\$1')
-}
-
-/**
- * Escape the capturing group by escaping special characters and meaning.
- *
- * @param  {string} group
- * @return {string}
- */
-function escapeGroup (group) {
-  return group.replace(/([=!:$\/()])/g, '\\$1')
-}
-
-/**
- * Attach the keys as a property of the regexp.
- *
- * @param  {!RegExp} re
- * @param  {Array}   keys
- * @return {!RegExp}
- */
-function attachKeys (re, keys) {
-  re.keys = keys
-  return re
-}
-
-/**
- * Get the flags for a regexp from the options.
- *
- * @param  {Object} options
- * @return {string}
- */
-function flags (options) {
-  return options.sensitive ? '' : 'i'
-}
-
-/**
- * Pull out keys from a regexp.
- *
- * @param  {!RegExp} path
- * @param  {!Array}  keys
- * @return {!RegExp}
- */
-function regexpToRegexp (path, keys) {
-  // Use a negative lookahead to match only capturing groups.
-  var groups = path.source.match(/\((?!\?)/g)
-
-  if (groups) {
-    for (var i = 0; i < groups.length; i++) {
-      keys.push({
-        name: i,
-        prefix: null,
-        delimiter: null,
-        optional: false,
-        repeat: false,
-        partial: false,
-        asterisk: false,
-        pattern: null
-      })
-    }
-  }
-
-  return attachKeys(path, keys)
-}
-
-/**
- * Transform an array into a regexp.
- *
- * @param  {!Array}  path
- * @param  {Array}   keys
- * @param  {!Object} options
- * @return {!RegExp}
- */
-function arrayToRegexp (path, keys, options) {
-  var parts = []
-
-  for (var i = 0; i < path.length; i++) {
-    parts.push(pathToRegexp(path[i], keys, options).source)
-  }
-
-  var regexp = new RegExp('(?:' + parts.join('|') + ')', flags(options))
-
-  return attachKeys(regexp, keys)
-}
-
-/**
- * Create a path regexp from string input.
- *
- * @param  {string}  path
- * @param  {!Array}  keys
- * @param  {!Object} options
- * @return {!RegExp}
- */
-function stringToRegexp (path, keys, options) {
-  var tokens = parse(path)
-  var re = tokensToRegExp(tokens, options)
-
-  // Attach keys back to the regexp.
-  for (var i = 0; i < tokens.length; i++) {
-    if (typeof tokens[i] !== 'string') {
-      keys.push(tokens[i])
-    }
-  }
-
-  return attachKeys(re, keys)
-}
-
-/**
- * Expose a function for taking tokens and returning a RegExp.
- *
- * @param  {!Array}  tokens
- * @param  {Object=} options
- * @return {!RegExp}
- */
-function tokensToRegExp (tokens, options) {
-  options = options || {}
-
-  var strict = options.strict
-  var end = options.end !== false
-  var route = ''
-  var lastToken = tokens[tokens.length - 1]
-  var endsWithSlash = typeof lastToken === 'string' && /\/$/.test(lastToken)
-
-  // Iterate over the tokens and create our regexp string.
-  for (var i = 0; i < tokens.length; i++) {
-    var token = tokens[i]
-
-    if (typeof token === 'string') {
-      route += escapeString(token)
-    } else {
-      var prefix = escapeString(token.prefix)
-      var capture = '(?:' + token.pattern + ')'
-
-      if (token.repeat) {
-        capture += '(?:' + prefix + capture + ')*'
-      }
-
-      if (token.optional) {
-        if (!token.partial) {
-          capture = '(?:' + prefix + '(' + capture + '))?'
-        } else {
-          capture = prefix + '(' + capture + ')?'
-        }
-      } else {
-        capture = prefix + '(' + capture + ')'
-      }
-
-      route += capture
-    }
-  }
-
-  // In non-strict mode we allow a slash at the end of match. If the path to
-  // match already ends with a slash, we remove it for consistency. The slash
-  // is valid at the end of a path match, not in the middle. This is important
-  // in non-ending mode, where "/test/" shouldn't match "/test//route".
-  if (!strict) {
-    route = (endsWithSlash ? route.slice(0, -2) : route) + '(?:\\/(?=$))?'
-  }
-
-  if (end) {
-    route += '$'
-  } else {
-    // In non-ending mode, we need the capturing groups to match as much as
-    // possible by using a positive lookahead to the end or next path segment.
-    route += strict && endsWithSlash ? '' : '(?=\\/|$)'
-  }
-
-  return new RegExp('^' + route, flags(options))
-}
-
-/**
- * Normalize the given path string, returning a regular expression.
- *
- * An empty array can be passed in for the keys, which will hold the
- * placeholder key descriptions. For example, using `/user/:id`, `keys` will
- * contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
- *
- * @param  {(string|RegExp|Array)} path
- * @param  {(Array|Object)=}       keys
- * @param  {Object=}               options
- * @return {!RegExp}
- */
-function pathToRegexp (path, keys, options) {
-  keys = keys || []
-
-  if (!isarray(keys)) {
-    options = /** @type {!Object} */ (keys)
-    keys = []
-  } else if (!options) {
-    options = {}
-  }
-
-  if (path instanceof RegExp) {
-    return regexpToRegexp(path, /** @type {!Array} */ (keys))
-  }
-
-  if (isarray(path)) {
-    return arrayToRegexp(/** @type {!Array} */ (path), /** @type {!Array} */ (keys), options)
-  }
-
-  return stringToRegexp(/** @type {string} */ (path), /** @type {!Array} */ (keys), options)
-}
-
-},{"isarray":20}],23:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var _arity = require('./internal/_arity');
 var _curry2 = require('./internal/_curry2');
 
@@ -2016,7 +1066,7 @@ module.exports = _curry2(function bind(fn, thisObj) {
   });
 });
 
-},{"./internal/_arity":32,"./internal/_curry2":38}],24:[function(require,module,exports){
+},{"./internal/_arity":27,"./internal/_curry2":33}],19:[function(require,module,exports){
 var pipe = require('./pipe');
 var reverse = require('./reverse');
 
@@ -2048,7 +1098,7 @@ module.exports = function compose() {
   return pipe.apply(this, reverse(arguments));
 };
 
-},{"./pipe":68,"./reverse":71}],25:[function(require,module,exports){
+},{"./pipe":64,"./reverse":68}],20:[function(require,module,exports){
 var _curry2 = require('./internal/_curry2');
 var _isArray = require('./internal/_isArray');
 var _isFunction = require('./internal/_isFunction');
@@ -2090,7 +1140,7 @@ module.exports = _curry2(function concat(a, b) {
   return a.concat(b);
 });
 
-},{"./internal/_curry2":38,"./internal/_isArray":49,"./internal/_isFunction":50,"./toString":75}],26:[function(require,module,exports){
+},{"./internal/_curry2":33,"./internal/_isArray":44,"./internal/_isFunction":45,"./toString":72}],21:[function(require,module,exports){
 var _curry1 = require('./internal/_curry1');
 var curryN = require('./curryN');
 
@@ -2140,9 +1190,9 @@ module.exports = _curry1(function curry(fn) {
   return curryN(fn.length, fn);
 });
 
-},{"./curryN":27,"./internal/_curry1":37}],27:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"./internal/_arity":32,"./internal/_curry1":37,"./internal/_curry2":38,"./internal/_curryN":40,"dup":14}],28:[function(require,module,exports){
+},{"./curryN":22,"./internal/_curry1":32}],22:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"./internal/_arity":27,"./internal/_curry1":32,"./internal/_curry2":33,"./internal/_curryN":35,"dup":12}],23:[function(require,module,exports){
 var _curry2 = require('./internal/_curry2');
 var _equals = require('./internal/_equals');
 
@@ -2176,7 +1226,7 @@ module.exports = _curry2(function equals(a, b) {
   return _equals(a, b, [], []);
 });
 
-},{"./internal/_curry2":38,"./internal/_equals":42}],29:[function(require,module,exports){
+},{"./internal/_curry2":33,"./internal/_equals":37}],24:[function(require,module,exports){
 var _curry2 = require('./internal/_curry2');
 var _dispatchable = require('./internal/_dispatchable');
 var _filter = require('./internal/_filter');
@@ -2226,7 +1276,7 @@ module.exports = _curry2(_dispatchable('filter', _xfilter, function(pred, filter
   );
 }));
 
-},{"./internal/_curry2":38,"./internal/_dispatchable":41,"./internal/_filter":43,"./internal/_isObject":51,"./internal/_reduce":58,"./internal/_xfilter":63,"./keys":66}],30:[function(require,module,exports){
+},{"./internal/_curry2":33,"./internal/_dispatchable":36,"./internal/_filter":38,"./internal/_isObject":46,"./internal/_reduce":53,"./internal/_xfilter":58,"./keys":61}],25:[function(require,module,exports){
 var _curry2 = require('./internal/_curry2');
 
 
@@ -2264,7 +1314,7 @@ module.exports = _curry2(function identical(a, b) {
   }
 });
 
-},{"./internal/_curry2":38}],31:[function(require,module,exports){
+},{"./internal/_curry2":33}],26:[function(require,module,exports){
 var _curry1 = require('./internal/_curry1');
 var _identity = require('./internal/_identity');
 
@@ -2289,9 +1339,9 @@ var _identity = require('./internal/_identity');
  */
 module.exports = _curry1(_identity);
 
-},{"./internal/_curry1":37,"./internal/_identity":46}],32:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],33:[function(require,module,exports){
+},{"./internal/_curry1":32,"./internal/_identity":41}],27:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"dup":13}],28:[function(require,module,exports){
 module.exports = function _arrayFromIterator(iter) {
   var list = [];
   var next;
@@ -2301,7 +1351,7 @@ module.exports = function _arrayFromIterator(iter) {
   return list;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 var _isArray = require('./_isArray');
 var _slice = require('./_slice');
 
@@ -2329,14 +1379,14 @@ module.exports = function _checkForMethod(methodname, fn) {
   };
 };
 
-},{"./_isArray":49,"./_slice":59}],35:[function(require,module,exports){
+},{"./_isArray":44,"./_slice":54}],30:[function(require,module,exports){
 module.exports = function _complement(f) {
   return function() {
     return !f.apply(this, arguments);
   };
 };
 
-},{}],36:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 var _indexOf = require('./_indexOf');
 
 
@@ -2344,11 +1394,11 @@ module.exports = function _contains(a, list) {
   return _indexOf(list, a, 0) >= 0;
 };
 
-},{"./_indexOf":47}],37:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"./_isPlaceholder":52,"dup":16}],38:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"./_curry1":37,"./_isPlaceholder":52,"dup":17}],39:[function(require,module,exports){
+},{"./_indexOf":42}],32:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"./_isPlaceholder":47,"dup":14}],33:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"./_curry1":32,"./_isPlaceholder":47,"dup":15}],34:[function(require,module,exports){
 var _curry1 = require('./_curry1');
 var _curry2 = require('./_curry2');
 var _isPlaceholder = require('./_isPlaceholder');
@@ -2388,9 +1438,9 @@ module.exports = function _curry3(fn) {
   };
 };
 
-},{"./_curry1":37,"./_curry2":38,"./_isPlaceholder":52}],40:[function(require,module,exports){
-arguments[4][18][0].apply(exports,arguments)
-},{"./_arity":32,"./_isPlaceholder":52,"dup":18}],41:[function(require,module,exports){
+},{"./_curry1":32,"./_curry2":33,"./_isPlaceholder":47}],35:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"./_arity":27,"./_isPlaceholder":47,"dup":16}],36:[function(require,module,exports){
 var _isArray = require('./_isArray');
 var _isTransformer = require('./_isTransformer');
 var _slice = require('./_slice');
@@ -2431,7 +1481,7 @@ module.exports = function _dispatchable(methodname, xf, fn) {
   };
 };
 
-},{"./_isArray":49,"./_isTransformer":54,"./_slice":59}],42:[function(require,module,exports){
+},{"./_isArray":44,"./_isTransformer":49,"./_slice":54}],37:[function(require,module,exports){
 var _arrayFromIterator = require('./_arrayFromIterator');
 var _functionName = require('./_functionName');
 var _has = require('./_has');
@@ -2542,7 +1592,7 @@ module.exports = function _equals(a, b, stackA, stackB) {
   return true;
 };
 
-},{"../identical":30,"../keys":66,"../type":76,"./_arrayFromIterator":33,"./_functionName":44,"./_has":45}],43:[function(require,module,exports){
+},{"../identical":25,"../keys":61,"../type":73,"./_arrayFromIterator":28,"./_functionName":39,"./_has":40}],38:[function(require,module,exports){
 module.exports = function _filter(fn, list) {
   var idx = 0;
   var len = list.length;
@@ -2557,22 +1607,22 @@ module.exports = function _filter(fn, list) {
   return result;
 };
 
-},{}],44:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 module.exports = function _functionName(f) {
   // String(x => x) evaluates to "x => x", so the pattern may not match.
   var match = String(f).match(/^function (\w*)/);
   return match == null ? '' : match[1];
 };
 
-},{}],45:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 module.exports = function _has(prop, obj) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 };
 
-},{}],46:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module.exports = function _identity(x) { return x; };
 
-},{}],47:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var equals = require('../equals');
 
 
@@ -2631,7 +1681,7 @@ module.exports = function _indexOf(list, a, idx) {
   return -1;
 };
 
-},{"../equals":28}],48:[function(require,module,exports){
+},{"../equals":23}],43:[function(require,module,exports){
 var _has = require('./_has');
 
 
@@ -2642,7 +1692,7 @@ module.exports = (function() {
     function _isArguments(x) { return _has('callee', x); };
 }());
 
-},{"./_has":45}],49:[function(require,module,exports){
+},{"./_has":40}],44:[function(require,module,exports){
 /**
  * Tests whether or not an object is an array.
  *
@@ -2661,29 +1711,29 @@ module.exports = Array.isArray || function _isArray(val) {
           Object.prototype.toString.call(val) === '[object Array]');
 };
 
-},{}],50:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 module.exports = function _isFunction(x) {
   return Object.prototype.toString.call(x) === '[object Function]';
 };
 
-},{}],51:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports = function _isObject(x) {
   return Object.prototype.toString.call(x) === '[object Object]';
 };
 
-},{}],52:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"dup":19}],53:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],48:[function(require,module,exports){
 module.exports = function _isString(x) {
   return Object.prototype.toString.call(x) === '[object String]';
 };
 
-},{}],54:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 module.exports = function _isTransformer(obj) {
   return typeof obj['@@transducer/step'] === 'function';
 };
 
-},{}],55:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports = function _map(fn, functor) {
   var idx = 0;
   var len = functor.length;
@@ -2695,14 +1745,14 @@ module.exports = function _map(fn, functor) {
   return result;
 };
 
-},{}],56:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 module.exports = function _pipe(f, g) {
   return function() {
     return g.call(this, f.apply(this, arguments));
   };
 };
 
-},{}],57:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 module.exports = function _quote(s) {
   var escaped = s
     .replace(/\\/g, '\\\\')
@@ -2717,7 +1767,7 @@ module.exports = function _quote(s) {
   return '"' + escaped.replace(/"/g, '\\"') + '"';
 };
 
-},{}],58:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 var _xwrap = require('./_xwrap');
 var bind = require('../bind');
 var isArrayLike = require('../isArrayLike');
@@ -2776,7 +1826,7 @@ module.exports = (function() {
   };
 }());
 
-},{"../bind":23,"../isArrayLike":65,"./_xwrap":64}],59:[function(require,module,exports){
+},{"../bind":18,"../isArrayLike":60,"./_xwrap":59}],54:[function(require,module,exports){
 /**
  * An optimized, private array `slice` implementation.
  *
@@ -2810,7 +1860,7 @@ module.exports = function _slice(args, from, to) {
   }
 };
 
-},{}],60:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 /**
  * Polyfill from <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString>.
  */
@@ -2834,7 +1884,7 @@ module.exports = (function() {
     };
 }());
 
-},{}],61:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 var _contains = require('./_contains');
 var _map = require('./_map');
 var _quote = require('./_quote');
@@ -2882,7 +1932,7 @@ module.exports = function _toString(x, seen) {
   }
 };
 
-},{"../keys":66,"../reject":70,"./_contains":36,"./_map":55,"./_quote":57,"./_toISOString":60}],62:[function(require,module,exports){
+},{"../keys":61,"../reject":66,"./_contains":31,"./_map":50,"./_quote":52,"./_toISOString":55}],57:[function(require,module,exports){
 module.exports = {
   init: function() {
     return this.xf['@@transducer/init']();
@@ -2892,7 +1942,7 @@ module.exports = {
   }
 };
 
-},{}],63:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 var _curry2 = require('./_curry2');
 var _xfBase = require('./_xfBase');
 
@@ -2911,7 +1961,7 @@ module.exports = (function() {
   return _curry2(function _xfilter(f, xf) { return new XFilter(f, xf); });
 }());
 
-},{"./_curry2":38,"./_xfBase":62}],64:[function(require,module,exports){
+},{"./_curry2":33,"./_xfBase":57}],59:[function(require,module,exports){
 module.exports = (function() {
   function XWrap(fn) {
     this.f = fn;
@@ -2927,7 +1977,7 @@ module.exports = (function() {
   return function _xwrap(fn) { return new XWrap(fn); };
 }());
 
-},{}],65:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 var _curry1 = require('./internal/_curry1');
 var _isArray = require('./internal/_isArray');
 var _isString = require('./internal/_isString');
@@ -2965,7 +2015,7 @@ module.exports = _curry1(function isArrayLike(x) {
   return false;
 });
 
-},{"./internal/_curry1":37,"./internal/_isArray":49,"./internal/_isString":53}],66:[function(require,module,exports){
+},{"./internal/_curry1":32,"./internal/_isArray":44,"./internal/_isString":48}],61:[function(require,module,exports){
 var _curry1 = require('./internal/_curry1');
 var _has = require('./internal/_has');
 var _isArguments = require('./internal/_isArguments');
@@ -3040,7 +2090,7 @@ module.exports = (function() {
     });
 }());
 
-},{"./internal/_curry1":37,"./internal/_has":45,"./internal/_isArguments":48}],67:[function(require,module,exports){
+},{"./internal/_curry1":32,"./internal/_has":40,"./internal/_isArguments":43}],62:[function(require,module,exports){
 var _curry2 = require('./internal/_curry2');
 var _reduce = require('./internal/_reduce');
 var keys = require('./keys');
@@ -3074,7 +2124,36 @@ module.exports = _curry2(function mapObjIndexed(fn, obj) {
   }, {}, keys(obj));
 });
 
-},{"./internal/_curry2":38,"./internal/_reduce":58,"./keys":66}],68:[function(require,module,exports){
+},{"./internal/_curry2":33,"./internal/_reduce":53,"./keys":61}],63:[function(require,module,exports){
+var _curry2 = require('./internal/_curry2');
+
+
+/**
+ * Tests a regular expression against a String. Note that this function will
+ * return an empty array when there are no matches. This differs from
+ * [`String.prototype.match`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/match)
+ * which returns `null` when there are no matches.
+ *
+ * @func
+ * @memberOf R
+ * @since v0.1.0
+ * @category String
+ * @sig RegExp -> String -> [String | Undefined]
+ * @param {RegExp} rx A regular expression.
+ * @param {String} str The string to match against
+ * @return {Array} The list of matches or empty array.
+ * @see R.test
+ * @example
+ *
+ *      R.match(/([a-z]a)/g, 'bananas'); //=> ['ba', 'na', 'na']
+ *      R.match(/a/, 'b'); //=> []
+ *      R.match(/a/, null); //=> TypeError: null does not have a method named "match"
+ */
+module.exports = _curry2(function match(rx, str) {
+  return str.match(rx) || [];
+});
+
+},{"./internal/_curry2":33}],64:[function(require,module,exports){
 var _arity = require('./internal/_arity');
 var _pipe = require('./internal/_pipe');
 var reduce = require('./reduce');
@@ -3111,7 +2190,7 @@ module.exports = function pipe() {
                 reduce(_pipe, arguments[0], tail(arguments)));
 };
 
-},{"./internal/_arity":32,"./internal/_pipe":56,"./reduce":69,"./tail":73}],69:[function(require,module,exports){
+},{"./internal/_arity":27,"./internal/_pipe":51,"./reduce":65,"./tail":70}],65:[function(require,module,exports){
 var _curry3 = require('./internal/_curry3');
 var _reduce = require('./internal/_reduce');
 
@@ -3151,7 +2230,7 @@ var _reduce = require('./internal/_reduce');
  */
 module.exports = _curry3(_reduce);
 
-},{"./internal/_curry3":39,"./internal/_reduce":58}],70:[function(require,module,exports){
+},{"./internal/_curry3":34,"./internal/_reduce":53}],66:[function(require,module,exports){
 var _complement = require('./internal/_complement');
 var _curry2 = require('./internal/_curry2');
 var filter = require('./filter');
@@ -3183,7 +2262,35 @@ module.exports = _curry2(function reject(pred, filterable) {
   return filter(_complement(pred), filterable);
 });
 
-},{"./filter":29,"./internal/_complement":35,"./internal/_curry2":38}],71:[function(require,module,exports){
+},{"./filter":24,"./internal/_complement":30,"./internal/_curry2":33}],67:[function(require,module,exports){
+var _curry3 = require('./internal/_curry3');
+
+
+/**
+ * Replace a substring or regex match in a string with a replacement.
+ *
+ * @func
+ * @memberOf R
+ * @since v0.7.0
+ * @category String
+ * @sig RegExp|String -> String -> String -> String
+ * @param {RegExp|String} pattern A regular expression or a substring to match.
+ * @param {String} replacement The string to replace the matches with.
+ * @param {String} str The String to do the search and replacement in.
+ * @return {String} The result.
+ * @example
+ *
+ *      R.replace('foo', 'bar', 'foo foo foo'); //=> 'bar foo foo'
+ *      R.replace(/foo/, 'bar', 'foo foo foo'); //=> 'bar foo foo'
+ *
+ *      // Use the "g" (global) flag to replace all occurrences:
+ *      R.replace(/foo/g, 'bar', 'foo foo foo'); //=> 'bar bar bar'
+ */
+module.exports = _curry3(function replace(regex, replacement, str) {
+  return str.replace(regex, replacement);
+});
+
+},{"./internal/_curry3":34}],68:[function(require,module,exports){
 var _curry1 = require('./internal/_curry1');
 var _isString = require('./internal/_isString');
 var _slice = require('./internal/_slice');
@@ -3218,7 +2325,7 @@ module.exports = _curry1(function reverse(list) {
                            _slice(list).reverse();
 });
 
-},{"./internal/_curry1":37,"./internal/_isString":53,"./internal/_slice":59}],72:[function(require,module,exports){
+},{"./internal/_curry1":32,"./internal/_isString":48,"./internal/_slice":54}],69:[function(require,module,exports){
 var _checkForMethod = require('./internal/_checkForMethod');
 var _curry3 = require('./internal/_curry3');
 
@@ -3251,7 +2358,7 @@ module.exports = _curry3(_checkForMethod('slice', function slice(fromIndex, toIn
   return Array.prototype.slice.call(list, fromIndex, toIndex);
 }));
 
-},{"./internal/_checkForMethod":34,"./internal/_curry3":39}],73:[function(require,module,exports){
+},{"./internal/_checkForMethod":29,"./internal/_curry3":34}],70:[function(require,module,exports){
 var _checkForMethod = require('./internal/_checkForMethod');
 var slice = require('./slice');
 
@@ -3285,7 +2392,7 @@ var slice = require('./slice');
  */
 module.exports = _checkForMethod('tail', slice(1, Infinity));
 
-},{"./internal/_checkForMethod":34,"./slice":72}],74:[function(require,module,exports){
+},{"./internal/_checkForMethod":29,"./slice":69}],71:[function(require,module,exports){
 var _curry2 = require('./internal/_curry2');
 
 
@@ -3311,7 +2418,7 @@ module.exports = _curry2(function tap(fn, x) {
   return x;
 });
 
-},{"./internal/_curry2":38}],75:[function(require,module,exports){
+},{"./internal/_curry2":33}],72:[function(require,module,exports){
 var _curry1 = require('./internal/_curry1');
 var _toString = require('./internal/_toString');
 
@@ -3354,7 +2461,7 @@ var _toString = require('./internal/_toString');
  */
 module.exports = _curry1(function toString(val) { return _toString(val, []); });
 
-},{"./internal/_curry1":37,"./internal/_toString":61}],76:[function(require,module,exports){
+},{"./internal/_curry1":32,"./internal/_toString":56}],73:[function(require,module,exports){
 var _curry1 = require('./internal/_curry1');
 
 
@@ -3387,7 +2494,39 @@ module.exports = _curry1(function type(val) {
          Object.prototype.toString.call(val).slice(8, -1);
 });
 
-},{"./internal/_curry1":37}],77:[function(require,module,exports){
+},{"./internal/_curry1":32}],74:[function(require,module,exports){
+var _curry2 = require('./internal/_curry2');
+
+
+/**
+ * Creates a new object out of a list of keys and a list of values.
+ * Key/value pairing is truncated to the length of the shorter of the two lists.
+ * Note: `zipObj` is equivalent to `pipe(zipWith(pair), fromPairs)`.
+ *
+ * @func
+ * @memberOf R
+ * @since v0.3.0
+ * @category List
+ * @sig [String] -> [*] -> {String: *}
+ * @param {Array} keys The array that will be properties on the output object.
+ * @param {Array} values The list of values on the output object.
+ * @return {Object} The object made by pairing up same-indexed elements of `keys` and `values`.
+ * @example
+ *
+ *      R.zipObj(['a', 'b', 'c'], [1, 2, 3]); //=> {a: 1, b: 2, c: 3}
+ */
+module.exports = _curry2(function zipObj(keys, values) {
+  var idx = 0;
+  var len = Math.min(keys.length, values.length);
+  var out = {};
+  while (idx < len) {
+    out[keys[idx]] = values[idx];
+    idx += 1;
+  }
+  return out;
+});
+
+},{"./internal/_curry2":33}],75:[function(require,module,exports){
 var VNode = require('./vnode');
 var is = require('./is');
 
@@ -3423,7 +2562,7 @@ module.exports = function h(sel, b, c) {
   return VNode(sel, data, children, text, undefined);
 };
 
-},{"./is":79,"./vnode":86}],78:[function(require,module,exports){
+},{"./is":77,"./vnode":84}],76:[function(require,module,exports){
 function createElement(tagName){
   return document.createElement(tagName);
 }
@@ -3479,13 +2618,13 @@ module.exports = {
   setTextContent: setTextContent
 };
 
-},{}],79:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 module.exports = {
   array: Array.isArray,
   primitive: function(s) { return typeof s === 'string' || typeof s === 'number'; },
 };
 
-},{}],80:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 var booleanAttrs = ["allowfullscreen", "async", "autofocus", "autoplay", "checked", "compact", "controls", "declare",
                 "default", "defaultchecked", "defaultmuted", "defaultselected", "defer", "disabled", "draggable",
                 "enabled", "formnovalidate", "hidden", "indeterminate", "inert", "ismap", "itemscope", "loop", "multiple",
@@ -3530,7 +2669,7 @@ function updateAttrs(oldVnode, vnode) {
 
 module.exports = {create: updateAttrs, update: updateAttrs};
 
-},{}],81:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 function updateClass(oldVnode, vnode) {
   var cur, name, elm = vnode.elm,
       oldClass = oldVnode.data.class,
@@ -3555,7 +2694,7 @@ function updateClass(oldVnode, vnode) {
 
 module.exports = {create: updateClass, update: updateClass};
 
-},{}],82:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 var is = require('../is');
 
 function arrInvoker(arr) {
@@ -3619,7 +2758,7 @@ function updateEventListeners(oldVnode, vnode) {
 
 module.exports = {create: updateEventListeners, update: updateEventListeners};
 
-},{"../is":79}],83:[function(require,module,exports){
+},{"../is":77}],81:[function(require,module,exports){
 function updateProps(oldVnode, vnode) {
   var key, cur, old, elm = vnode.elm,
       oldProps = oldVnode.data.props, props = vnode.data.props;
@@ -3644,7 +2783,7 @@ function updateProps(oldVnode, vnode) {
 
 module.exports = {create: updateProps, update: updateProps};
 
-},{}],84:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 var raf = (typeof window !== 'undefined' && window.requestAnimationFrame) || setTimeout;
 var nextFrame = function(fn) { raf(function() { raf(fn); }); };
 
@@ -3715,7 +2854,7 @@ function applyRemoveStyle(vnode, rm) {
 
 module.exports = {create: updateStyle, update: updateStyle, destroy: applyDestroyStyle, remove: applyRemoveStyle};
 
-},{}],85:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 // jshint newcap: false
 /* global require, module, document, Node */
 'use strict';
@@ -3975,7 +3114,7 @@ function init(modules, api) {
 
 module.exports = {init: init};
 
-},{"./htmldomapi":78,"./is":79,"./vnode":86}],86:[function(require,module,exports){
+},{"./htmldomapi":76,"./is":77,"./vnode":84}],84:[function(require,module,exports){
 module.exports = function(sel, data, children, text, elm) {
   var key = data === undefined ? undefined : data.key;
   return {sel: sel, data: data, children: children,

@@ -1,7 +1,7 @@
 {
   "name": "puddles",
   "version": "0.0.2",
-  "description": "Tiny redux app framework built on snabbdom",
+  "description": "Tiny redux-inspired vdom app framework",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/flintinatux/puddles.git"
@@ -26,9 +26,7 @@
     "prebuild": "npm run clean && mkdir -p dist"
   },
   "dependencies": {
-    "debug": "^2.2.0",
     "flyd": "^0.2.2",
-    "path-to-regexp": "^1.5.3",
     "ramda": "^0.22.1",
     "snabbdom": "^0.5.1"
   },

@@ -1,6 +1,6 @@
 # puddles
 
-Tiny redux app framework built on [snabbdom](https://github.com/paldepind/snabbdom).
+Tiny redux-inspired vdom app framework.
 
 ## Usage
 
