@@ -16,20 +16,20 @@ const p = require('puddles')
 
 ## API
 
-The `puddles` api is intentionally designed with a small footprint, and was inspired by other excellent vdom libraries such as [mithril](http://mithril.js.org/) and [snabbdom](https://github.com/paldepind/snabbdom), the latter on which it shamelessly depends for the underlying vdom implementation and [hyperscript function](#pselector-data-children).
+The `puddles` api has a small surface-area by design, and was inspired by other excellent vdom libraries such as [mithril](http://mithril.js.org/) and [snabbdom](https://github.com/paldepind/snabbdom), the latter of which provides the underlying vdom implementation and [hyperscript function](#pselector-data-children).
 
-| Function               | Brief description                   |
-| ---------------------- | ----------------------------------- |
-| [p](#p)                | Hyperscript function                |
-| [p.action](#paction)   | Curried action creator              |
-| [p.combine](#pcombine) | Reducer composer                    |
-| [p.handle](#phandle)   | Multi-action reducer factory        |
-| [p.mount](#pmount)     | Mounts a `puddles` app into the DOM |
-| [p.route](#proute)     | Light-weight `hashchange` router    |
+- [p](#p)                - hyperscript function
+- [p.action](#paction)   - curried action creator
+- [p.combine](#pcombine) - reducer composer
+- [p.handle](#phandle)   - multi-action reducer factory
+- [p.mount](#pmount)     - mounts a `puddles` app into the DOM
+- [p.route](#proute)     - light-weight `hashchange` router
 
 ## p
 
-    :: (String, Object, [Vnode]) -> Vnode
+```haskell
+:: (String, Object, [Vnode]) -> Vnode
+```
 
 #### Parameters
 
@@ -49,7 +49,9 @@ The `p` hyperscript function is a direct export of `snabbdom/h`, so I recommend 
 
 ## p.action
 
-    :: String -> a -> Object
+```haskell
+:: String -> a -> Object
+```
 
 #### Parameters
 
@@ -65,7 +67,7 @@ The `p` hyperscript function is a direct export of `snabbdom/h`, so I recommend 
 
 If the `payload` is a `thenable` or `forkable` monad, the dispatcher will first execute the async action defined by the payload, and then dispatch a new action of the same `type` with the resolved value.
 
-Note: `p.action` is also curried, so making action-creators is painless.
+**Note:** `p.action` is also curried, so making action-creators is painless.
 
 ```js
 const p = require('puddles')
@@ -80,7 +82,9 @@ sendEmail({ to: 'example@email.com' })
 
 ## p.combine
 
-    :: Object -> (a, Object) -> a
+```haskell
+:: Object -> (a, Object) -> a
+```
 
 #### Parameters
 
@@ -115,7 +119,9 @@ reducer(undefined, {})
 
 ## p.handle
 
-    :: (a, Object) -> (a, Object) -> a
+```haskell
+:: (a, Object) -> (a, Object) -> a
+```
 
 #### Parameters
 
@@ -157,7 +163,9 @@ state = reducer(state, p.action('NOT_HANDLED', null))
 
 ## p.mount
 
-    :: (Element, (a -> Vnode), ((a, Object) -> a)) -> Object
+```haskell
+:: (Element, (a -> Vnode), ((a, Object) -> a)) -> Object
+```
 
 #### Parameters
 
@@ -171,7 +179,7 @@ state = reducer(state, p.action('NOT_HANDLED', null))
 #### Returns
 
 - Object <br/>
-  An external interface object with `dispatch` and `teardown` functions.
+  An external interface object with `dispatch` and `state` [streams](https://github.com/paldepind/flyd#creating-streams), as well as a `teardown` function.
 
 TODO: details
 
@@ -210,7 +218,9 @@ p.mount(root, view, reducer)
 
 ## p.route
 
-    :: (String, Object) -> a -> Vnode
+```haskell
+:: (String, Object) -> a -> Vnode
+```
 
 #### Parameters
 
