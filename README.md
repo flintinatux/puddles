@@ -139,12 +139,12 @@ const view = state =>
       p('input', {
         on: { input: confirm },
         props: { value: state.confirm }
-      }),,
+      }),
 
       p('button', {
         attrs: { type: 'button' },
         on: { click: cancel }
-      }, 'Cancel')
+      }, 'Cancel'),
 
       p('button', {
         attrs: {
