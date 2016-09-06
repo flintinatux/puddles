@@ -1,6 +1,6 @@
 {
   "name": "puddles",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Tiny redux-inspired vdom app framework",
   "repository": {
     "type": "git",
