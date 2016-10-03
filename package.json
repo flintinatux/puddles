@@ -23,7 +23,10 @@
     "build": "browserify -s p index.js | buble > dist/puddles.js",
     "clean": "rm -rf dist/*",
     "postbuild": "uglifyjs dist/puddles.js -c -m > dist/puddles.min.js",
-    "prebuild": "npm run clean && mkdir -p dist"
+    "postversion": "git push --tags origin master",
+    "prebuild": "npm run clean && mkdir -p dist",
+    "preversion": "git checkout master",
+    "version": "npm run build && git add dist"
   },
   "dependencies": {
     "flyd": "^0.2.2",
