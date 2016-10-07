@@ -23,6 +23,7 @@ The `puddles` api has a small surface-area by design, and was inspired by other 
 - [p.batch](#pbatch)     - batch multiple actions
 - [p.combine](#pcombine) - reducer composer
 - [p.handle](#phandle)   - multi-action reducer factory
+- [p.href](#phref)       - `hashchange` route path helper
 - [p.mount](#pmount)     - mounts a `puddles` app into the DOM
 - [p.route](#proute)     - light-weight `hashchange` router
 
@@ -255,6 +256,33 @@ state = reducer(state, p.action('NOT_HANDLED', null))
 //> { counter: 5, color: 'red' }
 ```
 
+## p.href
+
+```haskell
+:: String -> String
+```
+
+#### Parameters
+
+- String `path` <br/>
+  Absolute target path.
+
+#### Returns
+
+- String `hashPath` <br/>
+  Path prepended by the value of `p.route.prefix`.
+
+The router created by `p.route` uses a routing strategy triggered by the `hashchange` event. This means that all of your links must have `href` attributes prefixed by the value of `p.route.prefix`, which defaults to `#!` (mostly for [tradition](https://webmasters.googleblog.com/2015/10/deprecating-our-ajax-crawling-scheme.html)).  Of course you could just always remember to prefix your own route links, but calling `p.href()` is sometimes simpler to remember.
+
+```js
+const p = require('puddles')
+
+const view = state =>
+  p('a.link', {
+    attrs: { href: p.href('/status') }  //> '#!/status'
+  }, 'Status')
+```
+
 ## p.mount
 
 ```haskell
@@ -337,19 +365,17 @@ const p = require('puddles')
 const user  = require('../ducks/user')
 const users = require('../ducks/users')
 
-const { href } = p.route
-
 const reducer = p.combine({ route: p.route.reducer, user, users })
 
 const layout = content => state =>
   p('div.layout', [
     p('nav.header', [
       p('a.tab', {
-        attrs: { href: href('/') }
+        attrs: { href: p.href('/') }
       }, 'Home'),
 
       p('a.tab', {
-        attrs: { href: href(`/profiles/${state.user.id}`) }
+        attrs: { href: p.href(`/profiles/${state.user.id}`) }
       }, 'My profile')
     ]),
 
