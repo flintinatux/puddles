@@ -11,6 +11,7 @@ const reducer = handle({}, {
   [ ROUTE_CHANGED ]: (_, route) => route
 })
 
-reducer.routeChanged = action(ROUTE_CHANGED)
+reducer.ROUTE_CHANGED = ROUTE_CHANGED
+reducer.routeChanged  = action(ROUTE_CHANGED)
 
 module.exports = reducer
