@@ -11,7 +11,8 @@ var ROUTE_CHANGED = prefix('ROUTE_CHANGED')
 var obj;
 var reducer = handle({}, ( obj = {}, obj[ ROUTE_CHANGED ] = function (_, route) { return route; }, obj ))
 
-reducer.routeChanged = action(ROUTE_CHANGED)
+reducer.ROUTE_CHANGED = ROUTE_CHANGED
+reducer.routeChanged  = action(ROUTE_CHANGED)
 
 module.exports = reducer
 
