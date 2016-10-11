@@ -16,12 +16,13 @@ reducer.routeChanged  = action(ROUTE_CHANGED)
 
 module.exports = reducer
 
-},{"../lib/action":3,"../lib/handle":7,"ramda/src/concat":23}],2:[function(require,module,exports){
+},{"../lib/action":3,"../lib/handle":8,"ramda/src/concat":24}],2:[function(require,module,exports){
 var p = require('snabbdom/h')
 
 p.action  = require('./lib/action')
 p.batch   = require('./lib/batch')
 p.combine = require('./lib/combine')
+p.error   = require('./lib/error')
 p.handle  = require('./lib/handle')
 p.href    = require('./lib/href')
 p.mount   = require('./lib/mount')
@@ -29,14 +30,14 @@ p.route   = require('./lib/route')
 
 module.exports = p
 
-},{"./lib/action":3,"./lib/batch":4,"./lib/combine":5,"./lib/handle":7,"./lib/href":9,"./lib/mount":10,"./lib/route":11,"snabbdom/h":82}],3:[function(require,module,exports){
-var curry = require('ramda/src/curry')
+},{"./lib/action":3,"./lib/batch":4,"./lib/combine":5,"./lib/error":6,"./lib/handle":8,"./lib/href":10,"./lib/mount":11,"./lib/route":12,"snabbdom/h":82}],3:[function(require,module,exports){
+var curryN = require('ramda/src/curryN')
 
-var action = curry(function (type, payload) { return ({ type: type, payload: payload }); })
+var action = curryN(2, function (type, payload) { return ({ type: type, payload: payload }); })
 
 module.exports = action
 
-},{"ramda/src/curry":24}],4:[function(require,module,exports){
+},{"ramda/src/curryN":25}],4:[function(require,module,exports){
 var compose = require('ramda/src/compose')
 var of      = require('ramda/src/of')
 var not     = require('ramda/src/not')
@@ -52,7 +53,7 @@ batch.type = type
 
 module.exports = batch
 
-},{"./action":3,"ramda/src/compose":22,"ramda/src/not":68,"ramda/src/of":69,"ramda/src/when":80}],5:[function(require,module,exports){
+},{"./action":3,"ramda/src/compose":23,"ramda/src/not":68,"ramda/src/of":69,"ramda/src/when":80}],5:[function(require,module,exports){
 var mapObj = require('ramda/src/mapObjIndexed')
 
 var combine = function (reducers) { return function (state, action) {
@@ -64,6 +65,13 @@ var combine = function (reducers) { return function (state, action) {
 module.exports = combine
 
 },{"ramda/src/mapObjIndexed":66}],6:[function(require,module,exports){
+var curryN = require('ramda/src/curryN')
+
+var error = curryN(2, function (type, err) { return ({ type: type, payload: err, error: true }); })
+
+module.exports = error
+
+},{"ramda/src/curryN":25}],7:[function(require,module,exports){
 var compose = require('ramda/src/compose')
 var events  = require('snabbdom/modules/eventlisteners')
 var when    = require('ramda/src/when')
@@ -93,18 +101,19 @@ module.exports = function (dispatch) { return ({
   update: wrap('update', dispatch)
 }); }
 
-},{"../lib/util":12,"ramda/src/compose":22,"ramda/src/when":80,"snabbdom/modules/eventlisteners":87}],7:[function(require,module,exports){
+},{"../lib/util":13,"ramda/src/compose":23,"ramda/src/when":80,"snabbdom/modules/eventlisteners":87}],8:[function(require,module,exports){
 var handle = function (init, reducers) { return function (state, ref) {
       if ( state === void 0 ) state=init;
       var type = ref.type;
       var payload = ref.payload;
+      var error = ref.error;
 
-      return reducers[type] ? reducers[type](state, payload) : state;
+      return reducers[type] ? reducers[type](state, payload, error) : state;
 ; }    }
 
 module.exports = handle
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var compose = require('ramda/src/compose')
 var when    = require('ramda/src/when')
 
@@ -125,7 +134,7 @@ module.exports = function (dispatch) { return ({
   update: wrapHooks(dispatch)
 }); }
 
-},{"../lib/util":12,"ramda/src/compose":22,"ramda/src/when":80}],9:[function(require,module,exports){
+},{"../lib/util":13,"ramda/src/compose":23,"ramda/src/when":80}],10:[function(require,module,exports){
 var concat = require('ramda/src/concat')
 
 var ref = require('./route');
@@ -133,7 +142,7 @@ var prefix = ref.prefix;
 
 module.exports = concat(prefix)
 
-},{"./route":11,"ramda/src/concat":23}],10:[function(require,module,exports){
+},{"./route":12,"ramda/src/concat":24}],11:[function(require,module,exports){
 var attrs    = require('snabbdom/modules/attributes')
 var classes  = require('snabbdom/modules/class')
 var compose  = require('ramda/src/compose')
@@ -146,10 +155,10 @@ var style    = require('snabbdom/modules/style')
 
 var action = require('./action')
 var batch  = require('./batch')
+var error  = require('./error')
 var events = require('./events')
 var hooks  = require('./hooks')
 var ref$1 = require('./util');
-var error = ref$1.error;
 var forkable = ref$1.forkable;
 var runnable = ref$1.runnable;
 var thenable = ref$1.thenable;
@@ -182,14 +191,17 @@ var reduceWith = function (reducer) { return function (dispatch, state) {
   var type = ref.type;
   var payload = ref.payload;
 
+  var dispatchAction = compose(dispatch, action(type))
+  var dispatchError  = compose(dispatch, error(type))
+
   if (type === batch.type) {
     payload.forEach(dispatch)
   } else if (forkable(payload)) {
-    payload.map(action(type)).fork(error, dispatch)
+    payload.fork(dispatchError, dispatchAction)
   } else if (runnable(payload)) {
-    payload.map(compose(dispatch, action(type))).run()
+    dispatchAction(payload.run())
   } else if (thenable(payload)) {
-    payload.then(action(type)).then(dispatch).catch(error)
+    payload.then(dispatchAction).catch(dispatchError)
   } else {
     return reducer(state(), dispatch())
   }
@@ -197,7 +209,7 @@ var reduceWith = function (reducer) { return function (dispatch, state) {
 
 module.exports = mount
 
-},{"./action":3,"./batch":4,"./events":6,"./hooks":8,"./util":12,"flyd":13,"ramda/src/compose":22,"ramda/src/identity":29,"snabbdom":90,"snabbdom/modules/attributes":85,"snabbdom/modules/class":86,"snabbdom/modules/props":88,"snabbdom/modules/style":89}],11:[function(require,module,exports){
+},{"./action":3,"./batch":4,"./error":6,"./events":7,"./hooks":9,"./util":13,"flyd":14,"ramda/src/compose":23,"ramda/src/identity":29,"snabbdom":90,"snabbdom/modules/attributes":85,"snabbdom/modules/class":86,"snabbdom/modules/props":88,"snabbdom/modules/style":89}],12:[function(require,module,exports){
 var compose   = require('ramda/src/compose')
 var flyd      = require('flyd')
 var h         = require('snabbdom/h')
@@ -261,7 +273,7 @@ route.prefix  = prefix
 
 module.exports = route
 
-},{"../ducks/route":1,"flyd":13,"ramda/src/always":20,"ramda/src/compose":22,"ramda/src/match":67,"ramda/src/replace":73,"ramda/src/zipObj":81,"snabbdom/h":82}],12:[function(require,module,exports){
+},{"../ducks/route":1,"flyd":14,"ramda/src/always":21,"ramda/src/compose":23,"ramda/src/match":67,"ramda/src/replace":73,"ramda/src/zipObj":81,"snabbdom/h":82}],13:[function(require,module,exports){
 var tap  = require('ramda/src/tap')
 
 exports.actionable = function (x) { return x && (typeof x === 'function' || x.type && x.payload !== undefined); }
@@ -276,7 +288,7 @@ exports.runnable = function (x) { return x && typeof x.run === 'function'; }
 
 exports.thenable = function (x) { return x && typeof x.then === 'function'; }
 
-},{"ramda/src/tap":77}],13:[function(require,module,exports){
+},{"ramda/src/tap":77}],14:[function(require,module,exports){
 'use strict';
 
 var curryN = require('ramda/src/curryN');
@@ -904,7 +916,7 @@ StreamTransformer.prototype['@@transducer/step'] = function(s, v) { return v; };
 
 module.exports = flyd;
 
-},{"ramda/src/curryN":14}],14:[function(require,module,exports){
+},{"ramda/src/curryN":15}],15:[function(require,module,exports){
 var _arity = require('./internal/_arity');
 var _curry1 = require('./internal/_curry1');
 var _curry2 = require('./internal/_curry2');
@@ -960,7 +972,7 @@ module.exports = _curry2(function curryN(length, fn) {
   return _arity(length, _curryN(length, [], fn));
 });
 
-},{"./internal/_arity":15,"./internal/_curry1":16,"./internal/_curry2":17,"./internal/_curryN":18}],15:[function(require,module,exports){
+},{"./internal/_arity":16,"./internal/_curry1":17,"./internal/_curry2":18,"./internal/_curryN":19}],16:[function(require,module,exports){
 module.exports = function _arity(n, fn) {
   /* eslint-disable no-unused-vars */
   switch (n) {
@@ -979,7 +991,7 @@ module.exports = function _arity(n, fn) {
   }
 };
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var _isPlaceholder = require('./_isPlaceholder');
 
 
@@ -1001,7 +1013,7 @@ module.exports = function _curry1(fn) {
   };
 };
 
-},{"./_isPlaceholder":19}],17:[function(require,module,exports){
+},{"./_isPlaceholder":20}],18:[function(require,module,exports){
 var _curry1 = require('./_curry1');
 var _isPlaceholder = require('./_isPlaceholder');
 
@@ -1031,7 +1043,7 @@ module.exports = function _curry2(fn) {
   };
 };
 
-},{"./_curry1":16,"./_isPlaceholder":19}],18:[function(require,module,exports){
+},{"./_curry1":17,"./_isPlaceholder":20}],19:[function(require,module,exports){
 var _arity = require('./_arity');
 var _isPlaceholder = require('./_isPlaceholder');
 
@@ -1075,14 +1087,14 @@ module.exports = function _curryN(length, received, fn) {
   };
 };
 
-},{"./_arity":15,"./_isPlaceholder":19}],19:[function(require,module,exports){
+},{"./_arity":16,"./_isPlaceholder":20}],20:[function(require,module,exports){
 module.exports = function _isPlaceholder(a) {
   return a != null &&
          typeof a === 'object' &&
          a['@@functional/placeholder'] === true;
 };
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var _curry1 = require('./internal/_curry1');
 
 
@@ -1111,7 +1123,7 @@ module.exports = _curry1(function always(val) {
   };
 });
 
-},{"./internal/_curry1":35}],21:[function(require,module,exports){
+},{"./internal/_curry1":35}],22:[function(require,module,exports){
 var _arity = require('./internal/_arity');
 var _curry2 = require('./internal/_curry2');
 
@@ -1143,7 +1155,7 @@ module.exports = _curry2(function bind(fn, thisObj) {
   });
 });
 
-},{"./internal/_arity":30,"./internal/_curry2":36}],22:[function(require,module,exports){
+},{"./internal/_arity":30,"./internal/_curry2":36}],23:[function(require,module,exports){
 var pipe = require('./pipe');
 var reverse = require('./reverse');
 
@@ -1175,7 +1187,7 @@ module.exports = function compose() {
   return pipe.apply(this, reverse(arguments));
 };
 
-},{"./pipe":70,"./reverse":74}],23:[function(require,module,exports){
+},{"./pipe":70,"./reverse":74}],24:[function(require,module,exports){
 var _curry2 = require('./internal/_curry2');
 var _isArray = require('./internal/_isArray');
 var _isFunction = require('./internal/_isFunction');
@@ -1217,59 +1229,9 @@ module.exports = _curry2(function concat(a, b) {
   return a.concat(b);
 });
 
-},{"./internal/_curry2":36,"./internal/_isArray":47,"./internal/_isFunction":48,"./toString":78}],24:[function(require,module,exports){
-var _curry1 = require('./internal/_curry1');
-var curryN = require('./curryN');
-
-
-/**
- * Returns a curried equivalent of the provided function. The curried function
- * has two unusual capabilities. First, its arguments needn't be provided one
- * at a time. If `f` is a ternary function and `g` is `R.curry(f)`, the
- * following are equivalent:
- *
- *   - `g(1)(2)(3)`
- *   - `g(1)(2, 3)`
- *   - `g(1, 2)(3)`
- *   - `g(1, 2, 3)`
- *
- * Secondly, the special placeholder value `R.__` may be used to specify
- * "gaps", allowing partial application of any combination of arguments,
- * regardless of their positions. If `g` is as above and `_` is `R.__`, the
- * following are equivalent:
- *
- *   - `g(1, 2, 3)`
- *   - `g(_, 2, 3)(1)`
- *   - `g(_, _, 3)(1)(2)`
- *   - `g(_, _, 3)(1, 2)`
- *   - `g(_, 2)(1)(3)`
- *   - `g(_, 2)(1, 3)`
- *   - `g(_, 2)(_, 3)(1)`
- *
- * @func
- * @memberOf R
- * @since v0.1.0
- * @category Function
- * @sig (* -> a) -> (* -> a)
- * @param {Function} fn The function to curry.
- * @return {Function} A new, curried function.
- * @see R.curryN
- * @example
- *
- *      var addFourNumbers = (a, b, c, d) => a + b + c + d;
- *
- *      var curriedAddFourNumbers = R.curry(addFourNumbers);
- *      var f = curriedAddFourNumbers(1, 2);
- *      var g = f(3);
- *      g(4); //=> 10
- */
-module.exports = _curry1(function curry(fn) {
-  return curryN(fn.length, fn);
-});
-
-},{"./curryN":25,"./internal/_curry1":35}],25:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"./internal/_arity":30,"./internal/_curry1":35,"./internal/_curry2":36,"./internal/_curryN":38,"dup":14}],26:[function(require,module,exports){
+},{"./internal/_curry2":36,"./internal/_isArray":47,"./internal/_isFunction":48,"./toString":78}],25:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"./internal/_arity":30,"./internal/_curry1":35,"./internal/_curry2":36,"./internal/_curryN":38,"dup":15}],26:[function(require,module,exports){
 var _curry2 = require('./internal/_curry2');
 var _equals = require('./internal/_equals');
 
@@ -1417,8 +1379,8 @@ var _identity = require('./internal/_identity');
 module.exports = _curry1(_identity);
 
 },{"./internal/_curry1":35,"./internal/_identity":44}],30:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],31:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],31:[function(require,module,exports){
 module.exports = function _arrayFromIterator(iter) {
   var list = [];
   var next;
@@ -1472,10 +1434,10 @@ module.exports = function _contains(a, list) {
 };
 
 },{"./_indexOf":45}],35:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"./_isPlaceholder":50,"dup":16}],36:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"./_curry1":35,"./_isPlaceholder":50,"dup":17}],37:[function(require,module,exports){
+},{"./_isPlaceholder":50,"dup":17}],36:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"./_curry1":35,"./_isPlaceholder":50,"dup":18}],37:[function(require,module,exports){
 var _curry1 = require('./_curry1');
 var _curry2 = require('./_curry2');
 var _isPlaceholder = require('./_isPlaceholder');
@@ -1516,8 +1478,8 @@ module.exports = function _curry3(fn) {
 };
 
 },{"./_curry1":35,"./_curry2":36,"./_isPlaceholder":50}],38:[function(require,module,exports){
-arguments[4][18][0].apply(exports,arguments)
-},{"./_arity":30,"./_isPlaceholder":50,"dup":18}],39:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"./_arity":30,"./_isPlaceholder":50,"dup":19}],39:[function(require,module,exports){
 var _isArray = require('./_isArray');
 var _isTransformer = require('./_isTransformer');
 var _slice = require('./_slice');
@@ -1799,8 +1761,8 @@ module.exports = function _isObject(x) {
 };
 
 },{}],50:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"dup":19}],51:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],51:[function(require,module,exports){
 module.exports = function _isString(x) {
   return Object.prototype.toString.call(x) === '[object String]';
 };
@@ -1906,7 +1868,7 @@ module.exports = (function() {
   };
 }());
 
-},{"../bind":21,"../isArrayLike":64,"./_xwrap":63}],58:[function(require,module,exports){
+},{"../bind":22,"../isArrayLike":64,"./_xwrap":63}],58:[function(require,module,exports){
 /**
  * An optimized, private array `slice` implementation.
  *
