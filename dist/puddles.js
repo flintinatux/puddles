@@ -162,6 +162,7 @@ var ref$1 = require('./util');
 var forkable = ref$1.forkable;
 var runnable = ref$1.runnable;
 var thenable = ref$1.thenable;
+var throttle = ref$1.throttle;
 
 var mount = function (root, view, reducer) {
   if ( reducer === void 0 ) reducer=I;
@@ -169,7 +170,7 @@ var mount = function (root, view, reducer) {
   var dispatch = flyd.stream()
   var state = flyd.combine(reduceWith(reducer), [dispatch])
   state(reducer(undefined, {}))
-  flyd.scan(patch(dispatch), root, state.map(view))
+  flyd.scan(patch(dispatch), root, throttle(state).map(view))
 
   function teardown() {
     patch(dispatch)(root, '')
@@ -274,7 +275,12 @@ route.prefix  = prefix
 module.exports = route
 
 },{"../ducks/route":1,"flyd":14,"ramda/src/always":21,"ramda/src/compose":23,"ramda/src/match":67,"ramda/src/replace":73,"ramda/src/zipObj":81,"snabbdom/h":82}],13:[function(require,module,exports){
+var flyd = require('flyd')
 var tap  = require('ramda/src/tap')
+
+var caf   = window.cancelAnimationFrame  || window.clearTimeout,
+      raf   = window.requestAnimationFrame || window.setTimeout,
+      frame = 16
 
 exports.actionable = function (x) { return x && (typeof x === 'function' || x.type && x.payload !== undefined); }
 
@@ -288,7 +294,20 @@ exports.runnable = function (x) { return x && typeof x.run === 'function'; }
 
 exports.thenable = function (x) { return x && typeof x.then === 'function'; }
 
-},{"ramda/src/tap":77}],14:[function(require,module,exports){
+exports.throttle = function (s) {
+  var id, last = 0
+  return flyd.combine(function (s, self) {
+    if (raf === window.requestAnimationFrame || new Date() - last > frame) {
+      caf(id)
+      id = raf(function () {
+        last = new Date()
+        self(s())
+      }, frame)
+    }
+  }, [ s ])
+}
+
+},{"flyd":14,"ramda/src/tap":77}],14:[function(require,module,exports){
 'use strict';
 
 var curryN = require('ramda/src/curryN');
