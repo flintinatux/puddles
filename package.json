@@ -21,12 +21,12 @@
   "main": "index.js",
   "scripts": {
     "build": "browserify -s p index.js | buble > dist/puddles.js",
-    "clean": "rm -rf dist/*",
+    "clean": "rm -rf dist && mkdir -p dist",
+    "hint": "jshint --reporter=node_modules/jshint-stylish lib index.js",
     "postbuild": "uglifyjs dist/puddles.js -c -m > dist/puddles.min.js",
     "postversion": "git push --tags origin master",
-    "prebuild": "npm run clean && mkdir -p dist",
-    "preversion": "git checkout master",
-    "version": "npm run build && git add dist"
+    "prebuild": "yarn run clean && yarn run hint",
+    "preversion": "git checkout master && yarn run build"
   },
   "dependencies": {
     "flyd": "^0.2.2",
@@ -36,6 +36,8 @@
   "devDependencies": {
     "browserify": "^13.1.0",
     "buble": "^0.13.1",
+    "jshint": "^2.9.4",
+    "jshint-stylish": "^2.2.1",
     "uglify-js": "^2.7.3"
   }
 }

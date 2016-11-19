@@ -1,0 +1,10 @@
+{
+  "asi": true,
+  "browser": true,
+  "browserify": true,
+  "devel": true,
+  "esversion": 6,
+  "laxbreak": true,
+  "undef": true,
+  "unused": true
+}
