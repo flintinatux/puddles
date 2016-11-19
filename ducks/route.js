@@ -5,13 +5,13 @@ const handle = require('../lib/handle')
 
 const prefix = concat('puddles/route/')
 
-const ROUTE_CHANGED = prefix('ROUTE_CHANGED')
+const NAVIGATE = prefix('NAVIGATE')
 
 const reducer = handle({}, {
-  [ ROUTE_CHANGED ]: (_, route) => route
+  [ NAVIGATE ]: (_, route) => route
 })
 
-reducer.ROUTE_CHANGED = ROUTE_CHANGED
-reducer.routeChanged  = action(ROUTE_CHANGED)
+reducer.NAVIGATE = NAVIGATE
+reducer.navigate = action(NAVIGATE)
 
 module.exports = reducer
