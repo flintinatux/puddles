@@ -22,7 +22,7 @@
   "scripts": {
     "build": "browserify -s p index.js | buble > dist/puddles.js",
     "clean": "rm -rf dist && mkdir -p dist",
-    "hint": "jshint --reporter=node_modules/jshint-stylish lib index.js",
+    "hint": "jshint --reporter=node_modules/jshint-stylish index.js ducks lib",
     "postbuild": "uglifyjs dist/puddles.js -c -m > dist/puddles.min.js",
     "postversion": "git push --tags origin master",
     "prebuild": "yarn run clean && yarn run hint",
