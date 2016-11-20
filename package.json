@@ -29,6 +29,7 @@
     "preversion": "git checkout master && yarn run build"
   },
   "dependencies": {
+    "crocks": "^0.1.0",
     "flyd": "^0.2.2",
     "ramda": "^0.22.1",
     "snabbdom": "^0.5.1"
