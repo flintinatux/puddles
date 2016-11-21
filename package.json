@@ -26,7 +26,8 @@
     "postbuild": "uglifyjs dist/puddles.js -c -m > dist/puddles.min.js",
     "postversion": "git push --tags origin master",
     "prebuild": "yarn run clean && yarn run hint",
-    "preversion": "git checkout master && yarn run build"
+    "preversion": "git checkout master && yarn run build",
+    "test": "mocha --reporter dot"
   },
   "dependencies": {
     "crocks": "^0.1.0",
@@ -37,8 +38,11 @@
   "devDependencies": {
     "browserify": "^13.1.0",
     "buble": "^0.13.1",
+    "chai": "^3.5.0",
+    "jsdom": "^9.8.3",
     "jshint": "^2.9.4",
     "jshint-stylish": "^2.2.1",
+    "mocha": "^3.1.2",
     "uglify-js": "^2.7.3"
   }
 }

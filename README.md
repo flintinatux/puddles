@@ -1,4 +1,4 @@
-# puddles
+# puddles [![npm version](https://img.shields.io/npm/v/puddles.svg)](https://www.npmjs.com/package/puddles) [![npm version](https://img.shields.io/npm/dt/puddles.svg)](https://www.npmjs.com/package/puddles) [![Build Status](https://travis-ci.org/flintinatux/puddles.svg?branch=master)](https://travis-ci.org/flintinatux/puddles)
 
 Tiny redux-inspired vdom app framework.
 
