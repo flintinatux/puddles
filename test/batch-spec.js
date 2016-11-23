@@ -4,7 +4,7 @@ const action = require('../lib/action')
 const batch  = require('../lib/batch')
 
 describe('p.batch', function () {
-  const a  = action('type', 'payload')
+  const a  = action('type', 'payload'),
         as = [ a, a ]
 
   describe('when supplied with an array of actions', function () {
