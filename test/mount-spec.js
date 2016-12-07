@@ -1,9 +1,8 @@
 /* jshint expr: true */
 
-const { compose, IO } = require('crocks')
 const { expect } = require('chai')
-const { jsdom }  = require('jsdom')
 const h = require('snabbdom/h')
+const { IO } = require('crocks')
 
 const action = require('../lib/action')
 const batch  = require('../lib/batch')
@@ -11,7 +10,7 @@ const handle = require('../lib/handle')
 const mount  = require('../lib/mount')
 const Task   = require('../lib/task')
 
-global.document = jsdom()
+const { spy, wait } = require('./lib/util')
 
 const add = action('ADD')
 
@@ -19,18 +18,10 @@ const reducer = handle(0, {
   ADD: (count, step, error) => error ? step : count + step
 })
 
-const spy = () => {
-  var calls = 0
-  return () => ++calls
-}
-
 const view = state =>
   h('div.foo', {
     on: { click: [ add, 2 ] }
   }, state)
-
-const wait = fn =>
-  setTimeout(fn, 60)
 
 describe('p.mount', function () {
   var dispatch, root, state, teardown
@@ -96,12 +87,13 @@ describe('p.mount', function () {
   });
 
   it('throttles redraws', function (done) {
-    const calls = root.map(spy())
-    expect(calls()).to.equal(1) // to initialize stream
+    const redraw = spy()
+    root.map(redraw)
+    expect(redraw.calls.length).to.equal(1) // to initialize stream
     dispatch(add(2))
     dispatch(add(3))
     wait(() => {
-      expect(calls()).to.equal(2) // only one redraw
+      expect(redraw.calls.length).to.equal(2) // only one redraw
       done()
     })
   });
