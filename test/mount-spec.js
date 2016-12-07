@@ -8,7 +8,7 @@ const action = require('../lib/action')
 const batch  = require('../lib/batch')
 const handle = require('../lib/handle')
 const mount  = require('../lib/mount')
-const Task   = require('../lib/task')
+const Task   = require('./lib/task')
 
 const { spy, wait } = require('./lib/util')
 
