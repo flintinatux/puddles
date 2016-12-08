@@ -1,6 +1,12 @@
-# puddles [![npm version](https://img.shields.io/npm/v/puddles.svg)](https://www.npmjs.com/package/puddles) [![npm version](https://img.shields.io/npm/dt/puddles.svg)](https://www.npmjs.com/package/puddles) [![Build Status](https://travis-ci.org/flintinatux/puddles.svg?branch=master)](https://travis-ci.org/flintinatux/puddles)
-
-Tiny redux-inspired vdom app framework.
+<p align="center">
+  <a href="#"><img src="https://cloud.githubusercontent.com/assets/888052/20999261/576617f4-bce1-11e6-93ed-04bc57142603.png" alt="logo-480" style="max-width:100%;"></a>
+</p>
+<p align="center">
+  Tiny redux-inspired vdom app framework.
+</p>
+<p align="center">
+  <a href="https://www.npmjs.com/package/puddles"><img src="https://img.shields.io/npm/v/puddles.svg" alt="npm version" style="max-width:100%;"></a> <a href="https://www.npmjs.com/package/puddles"><img src="https://img.shields.io/npm/dt/puddles.svg" alt="npm downloads" style="max-width:100%;"></a> <a href="https://travis-ci.org/flintinatux/puddles"><img src="https://travis-ci.org/flintinatux/puddles.svg?branch=master" alt="Build Status" style="max-width:100%;"></a>
+</p>
 
 ## Usage
 
