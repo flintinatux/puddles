@@ -28,6 +28,7 @@ The `puddles` api has a small surface-area by design, and was inspired by other 
 - [p.action](#paction)   - curried action creator
 - [p.batch](#pbatch)     - batch multiple actions
 - [p.combine](#pcombine) - reducer composer
+- [p.error](#perror)     - curried error-action creator
 - [p.handle](#phandle)   - multi-action reducer factory
 - [p.href](#phref)       - `hashchange` route path helper
 - [p.mount](#pmount)     - mounts a `puddles` app into the DOM
@@ -218,6 +219,39 @@ reducer(undefined, {})
 //> { counter: 0, pet: { name: null } }
 ```
 
+## p.error
+
+```haskell
+:: String -> Error -> Object
+```
+
+#### Parameters
+
+- string `type` <br/>
+  The action type, traditionally uppercase, but that is not enforced.
+- Error `payload` <br/>
+  An `Error` representing the failed action.
+
+#### Returns
+
+- Object <br/>
+  An [FSA-compliant](https://github.com/acdlite/flux-standard-action) action representing an error, with the format `{ type, payload, error: true }`.
+
+When an error-action is dispatched, the payload will be the supplied error, and the `error` flag will be `true`.
+
+**Note:** `p.error` is also curried, so making action-creators is painless.
+
+```js
+const p = require('puddles')
+
+p.error('FETCH_USER', new Error('fetch failed'))
+//> { type: 'FETCH_USER', payload: Error(...), error: true }
+
+const sendEmail = p.error('SEND_EMAIL')
+sendEmail(new Error('mailbox full'))
+//> { type: 'SEND_EMAIL', payload: Error(...), error: true }
+```
+
 ## p.handle
 
 ```haskell
@@ -307,7 +341,7 @@ const view = state =>
 #### Returns
 
 - Object <br/>
-  An external interface object with `dispatch` and `state` [streams](https://github.com/paldepind/flyd#creating-streams), as well as a `teardown` function.
+  An external interface object with `dispatch`, `root`, and `state` [streams](https://github.com/paldepind/flyd#creating-streams), as well as a `teardown` function.
 
 TODO: details
 
