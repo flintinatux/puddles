@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="#"><img src="https://cloud.githubusercontent.com/assets/888052/20999261/576617f4-bce1-11e6-93ed-04bc57142603.png" alt="logo-480" style="max-width:100%;"></a>
+  <a href="#"><img src="https://cloud.githubusercontent.com/assets/888052/21037000/31cc30c0-bd98-11e6-9f9e-16faabfb1c25.png" alt="puddles" style="max-width:100%;"></a>
 </p>
 <p align="center">
   Tiny redux-inspired vdom app framework.
