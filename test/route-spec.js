@@ -1,7 +1,7 @@
 /* jshint expr: true */
 
 const { expect } = require('chai')
-const h = require('snabbdom/h')
+const h = require('snabbdom/h').default
 const { path } = require('ramda')
 
 const href     = require('../lib/href')

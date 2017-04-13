@@ -1,14 +1,13 @@
 /* jshint expr: true */
 
+const { Async, IO } = require('crocks')
 const { expect } = require('chai')
-const h = require('snabbdom/h')
-const { IO } = require('crocks')
+const h = require('snabbdom/h').default
 
 const action = require('../lib/action')
 const batch  = require('../lib/batch')
 const handle = require('../lib/handle')
 const mount  = require('../lib/mount')
-const Task   = require('./lib/task')
 
 const { spy, wait } = require('./lib/util')
 
@@ -35,6 +34,10 @@ describe('p.mount', function () {
     teardown  = res.teardown
     expect(state()).to.equal(0)
     wait(done)
+  });
+
+  afterEach(function() {
+    teardown()
   });
 
   it('returns a dispatch stream', function () {
@@ -112,6 +115,37 @@ describe('p.mount', function () {
     dispatch(thunk)
   });
 
+  it('forks dispatched forkables', function (done) {
+    const forkable = Async((rej, res) => {
+      expect(rej).to.equal(dispatch)
+      expect(res).to.equal(dispatch)
+      res(add(2))
+    })
+    dispatch(forkable)
+    wait(() => {
+      expect(state()).to.equal(2)
+      done()
+    })
+  });
+
+  it('runs dispatched runnables', function (done) {
+    const runnable = IO(() => add(2))
+    dispatch(runnable)
+    wait(() => {
+      expect(state()).to.equal(2)
+      done()
+    })
+  });
+
+  it('resolves dispatched thenables', function (done) {
+    const thenable = new Promise(res => res(add(2)))
+    dispatch(thenable)
+    wait(() => {
+      expect(state()).to.equal(2)
+      done()
+    })
+  });
+
   it('unwraps batched actions and dispatches each one', function () {
     dispatch(batch([ add(2), add(3) ]))
     expect(state()).to.equal(5)
@@ -119,7 +153,7 @@ describe('p.mount', function () {
 
   describe('when a forkable payload is resolved', function () {
     beforeEach(function () {
-      dispatch(add(Task((rej, res) => res(2))))
+      dispatch(add(Async((rej, res) => res(2))))
     });
 
     it('dispatches a new action with resolved value', function () {
@@ -131,7 +165,7 @@ describe('p.mount', function () {
     const err = new Error('an error')
 
     beforeEach(function () {
-      dispatch(add(Task(rej => rej(err))))
+      dispatch(add(Async(rej => rej(err))))
     });
 
     it('dispatches a matching error action', function () {

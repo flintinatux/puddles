@@ -1,4 +1,4 @@
-const p = require('snabbdom/h')
+const p = require('snabbdom/h').default
 
 p.action  = require('./lib/action')
 p.batch   = require('./lib/batch')
