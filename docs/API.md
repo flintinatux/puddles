@@ -264,7 +264,7 @@ sendEmail(new Error('mailbox full'))
 ### p.handle
 
 ```haskell
-(a, { k: ((a, Action) -> a) }) -> (a, Action) -> a
+a -> { k: ((a, Action) -> a) } -> (a, Action) -> a
 ```
 
 #### Parameters
@@ -390,7 +390,7 @@ p.mount(root, view, reducer)
 ### p.route
 
 ```haskell
-(String, { k: (a -> Vnode) }) -> a -> Vnode
+String -> { k: (a -> Vnode) } -> a -> Vnode
 ```
 
 #### Parameters
