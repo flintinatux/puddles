@@ -14,14 +14,16 @@ The main goal of `puddles` is to make the [Redux](http://redux.js.org/) pattern 
 
 With `puddles` you get all of these right out-of-the-box:
 
-- curried [action creators]()
-- switch-free [reducer construction]()
-- dead simple [reducer composition]()
-- hash-based [client-side routing]()
-- [automatically dispatched]() user actions
-- integration with the [Redux DevTools extension]()
+- curried [action creators](https://github.com/flintinatux/puddles/blob/master/docs/API.md#paction)
+- switch-free [reducer construction](https://github.com/flintinatux/puddles/blob/master/docs/API.md#phandle)
+- dead simple [reducer composition](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pcombine)
+- pure view functions in [plain javascript](https://github.com/flintinatux/puddles/blob/master/docs/API.md#p)
+- hash-based [client-side routing](https://github.com/flintinatux/puddles/blob/master/docs/API.md#proute)
+- native support for [asynchronous actions](https://github.com/flintinatux/puddles/blob/master/docs/API.md#paction)
+- [automatically dispatched](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pmount) user actions
+- integration with the [Redux DevTools extension](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pdevtools)
 
-To whet your appetite, here's the obligatory Hello World example:
+To whet your appetite, try the obligatory Hello World example:
 
 ```js
 const compose = require('ramda/src/compose')
@@ -29,7 +31,7 @@ const merge   = require('ramda/src/merge')
 const p       = require('puddles')
 const path    = require('ramda/src/path')
 
-const init = { name: '' }
+const init = { name: 'world' }
 
 const reducer = p.handle(init, {
   SET_NAME: (state, name) => merge(state, { name })
@@ -57,4 +59,4 @@ p.mount(root, view, reducer)
 
 Notice anything missing?  There is no `dispatch` function!  The `setName` action creator attached to the `input` event is composed with the `dispatch` function internally.
 
-Impressed?  Then read the [full documentation]() to learn more.
+Impressed?  Then read the [full documentation](https://github.com/flintinatux/puddles/blob/master/docs/API.md) to learn more.

@@ -2,15 +2,16 @@
 
 The `puddles` api has a small surface-area by design, and was inspired by other excellent vdom libraries such as [mithril](http://mithril.js.org/) and [snabbdom](https://github.com/paldepind/snabbdom), the latter of which provides the underlying vdom implementation and [hyperscript function](#pselector-data-children).
 
-- [p](#p)                - hyperscript function
-- [p.action](#paction)   - curried action creator
-- [p.batch](#pbatch)     - batch multiple actions
-- [p.combine](#pcombine) - reducer composer
-- [p.error](#perror)     - curried error-action creator
-- [p.handle](#phandle)   - multi-action reducer factory
-- [p.href](#phref)       - `hashchange` route path helper
-- [p.mount](#pmount)     - mounts a `puddles` app into the DOM
-- [p.route](#proute)     - light-weight `hashchange` router
+- [p](#p)                  - hyperscript function
+- [p.action](#paction)     - curried action creator
+- [p.batch](#pbatch)       - batch multiple actions
+- [p.combine](#pcombine)   - reducer composer
+- [p.devTools](#pdevtools) - opt-in Redux DevTools integration
+- [p.error](#perror)       - curried error-action creator
+- [p.handle](#phandle)     - multi-action reducer factory
+- [p.href](#phref)         - `hashchange` route path helper
+- [p.mount](#pmount)       - mounts a `puddles` app into the DOM
+- [p.route](#proute)       - light-weight `hashchange` router
 
 ### p
 
@@ -193,6 +194,38 @@ const reducer = p.combine({ counter, pet })
 
 reducer(undefined, {})
 //> { counter: 0, pet: { name: null } }
+```
+
+### p.devTools
+
+```haskell
+Stream -> Stream -> Object
+```
+
+#### Parameters
+
+- Stream `dispatch` <br/>
+  The dispatch stream returned by [`p.mount`](#pmount).
+- Stream `state` <br/>
+  The state stream returned by [`p.mount`](#pmount).
+
+#### Returns
+
+- Object <br/>
+  The [Redux DevTools](http://extension.remotedev.io/) extension [interface object](http://extension.remotedev.io/docs/API/Methods.html#connectoptions)
+
+Useful for debugging.  Harness the full time-travel power of the DevTools!
+
+```js
+const { dispatch, state } = p.mount(root, view, reducer)
+
+// poor man's debugging
+const logger = console.log.bind(console)
+dispatch.map(logger)
+state.map(logger)
+
+// much better debugging
+p.devTools(dispatch, state)
 ```
 
 ### p.error
