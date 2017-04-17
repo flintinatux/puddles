@@ -59,4 +59,4 @@ p.mount(root, view, reducer)
 
 Notice anything missing?  There is no `dispatch` function!  The `setName` action creator attached to the `input` event is composed with the `dispatch` function internally.
 
-Impressed?  Then read the [full documentation](https://github.com/flintinatux/puddles/blob/master/docs/API.md) to learn more.
+Impressed?  Read the [full documentation](https://github.com/flintinatux/puddles/blob/master/docs/API.md) to learn more.
