@@ -30,16 +30,16 @@
     "test": "mocha --reporter dot"
   },
   "dependencies": {
-    "crocks": "^0.1.0",
-    "flyd": "^0.2.2",
-    "ramda": "^0.22.1",
-    "snabbdom": "^0.5.1"
+    "flyd": "^0.2.4",
+    "ramda": "^0.23.0",
+    "snabbdom": "^0.6.7"
   },
   "devDependencies": {
     "browserify": "^13.1.0",
     "buble": "^0.13.1",
     "chai": "^3.5.0",
-    "jsdom": "^9.8.3",
+    "crocks": "^0.4.1",
+    "jsdom": "^9.12.0",
     "jshint": "^2.9.4",
     "jshint-stylish": "^2.2.1",
     "mocha": "^3.1.2",

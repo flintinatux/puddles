@@ -18,7 +18,7 @@ global.location = {
   }
 }
 
-afterEach(function () {
+afterEach(function() {
   emitter.removeAllListeners()
   global.location.hash = ''
-});
+})
