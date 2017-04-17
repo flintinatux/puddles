@@ -30,22 +30,22 @@ pet.feed = K(action('FEED', null))
 
 const reducer = combine({ count, pet })
 
-describe('p.combine', function () {
+describe('p.combine', function() {
   var state
 
-  beforeEach(function () {
+  beforeEach(function() {
     state = reducer(undefined, {})
-  });
+  })
 
-  it('inits a state object with keys matching the reducer map', function () {
+  it('inits a state object with keys matching the reducer map', function() {
     expect(state.count).to.equal(0)
     expect(state.pet).to.equal(petInit)
-  });
+  })
 
-  it('calls every child reducer and gathers results', function () {
+  it('calls every child reducer and gathers results', function() {
     state = reducer(state, count.add(2))
     expect(state.count).to.equal(2)
     state = reducer(state, pet.feed())
     expect(state.pet.hungry).to.be.false
-  });
-});
+  })
+})

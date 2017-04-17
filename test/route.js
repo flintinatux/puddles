@@ -22,7 +22,7 @@ const home = ({ route }) =>
 const user = ({ route }) =>
   h('div.user', route.params.name)
 
-describe('p.route', function () {
+describe('p.route', function() {
   var current, root, router, state
 
   beforeEach(function (done) {
@@ -40,47 +40,47 @@ describe('p.route', function () {
     current = router.map(child)
 
     wait(done)
-  });
+  })
 
-  it('creates a root elem with selector `div#root`', function () {
+  it('creates a root elem with selector `div#root`', function() {
     expect(root().sel).to.equal('div#root')
-  });
+  })
 
-  it('creates a single child with selector `div#router`', function () {
+  it('creates a single child with selector `div#router`', function() {
     expect(router().sel).to.equal('div#router')
-  });
+  })
 
-  it('nests the current view inside the #router elem', function () {
+  it('nests the current view inside the #router elem', function() {
     expect(current().sel).to.equal('div.home')
-  });
+  })
 
-  it('defaults to the initial path', function () {
+  it('defaults to the initial path', function() {
     expect(state().route.path).to.equal('/home')
-  });
+  })
 
-  it('passes full state down to current view', function () {
+  it('passes full state down to current view', function() {
     expect(current().elm.classList.contains('active')).to.be.true
-  });
+  })
 
-  describe('when route changes to a registered pattern', function () {
+  describe('when route changes to a registered pattern', function() {
     const name = 'flintinatux'
 
     beforeEach(function (done) {
       location.hash = href(`/user/${name}`)
       wait(done)
-    });
+    })
 
-    it('swaps the current view', function () {
+    it('swaps the current view', function() {
       expect(current().sel).to.equal('div.user')
-    });
+    })
 
-    it('matches route params', function () {
+    it('matches route params', function() {
       expect(state().route.params.name).to.equal(name)
       expect(current().text).to.equal(name)
-    });
-  });
+    })
+  })
 
-  describe('when new route does not match any patterns', function () {
+  describe('when new route does not match any patterns', function() {
     var _error
 
     const notFound = () =>
@@ -91,18 +91,18 @@ describe('p.route', function () {
       console.error = spy()
       expect(notFound).to.not.throw()
       wait(done)
-    });
+    })
 
-    afterEach(function () {
+    afterEach(function() {
       console.error = _error
-    });
+    })
 
-    it('logs an error', function () {
+    it('logs an error', function() {
       expect(console.error.calls[0].args[0]).to.contain('Route not found')
-    });
+    })
 
-    it('stays put', function () {
+    it('stays put', function() {
       expect(state().route.path).to.equal('/home')
-    });
-  });
-});
+    })
+  })
+})
