@@ -5,7 +5,6 @@ const { expect } = require('chai')
 const h = require('snabbdom/h').default
 
 const action = require('../lib/action')
-const batch  = require('../lib/batch')
 const handle = require('../lib/handle')
 const mount  = require('../lib/mount')
 
@@ -108,17 +107,17 @@ describe('p.mount', function () {
 
   it('runs dispatched thunk functions', function (done) {
     const thunk = (d, s) => {
-      expect(d).to.equal(dispatch)
-      expect(s).to.equal(state)
-      done()
+      d(add(2))
+      wait(() => {
+        expect(s()).to.equal(2)
+        done()
+      })
     }
     dispatch(thunk)
   });
 
   it('forks dispatched forkables', function (done) {
     const forkable = Async((rej, res) => {
-      expect(rej).to.equal(dispatch)
-      expect(res).to.equal(dispatch)
       res(add(2))
     })
     dispatch(forkable)
@@ -146,8 +145,8 @@ describe('p.mount', function () {
     })
   });
 
-  it('unwraps batched actions and dispatches each one', function () {
-    dispatch(batch([ add(2), add(3) ]))
+  it('maps over dispatched functors', function () {
+    dispatch([ add(2), add(3) ])
     expect(state()).to.equal(5)
   });
 

@@ -1,7 +1,6 @@
 const p = require('snabbdom/h').default
 
 p.action   = require('./lib/action')
-p.batch    = require('./lib/batch')
 p.combine  = require('./lib/combine')
 p.devTools = require('./lib/dev-tools')
 p.error    = require('./lib/error')
