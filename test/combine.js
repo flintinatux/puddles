@@ -1,5 +1,3 @@
-/* jshint expr: true */
-
 const { expect } = require('chai')
 
 const { add, always: K, assoc } = require('ramda')

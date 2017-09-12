@@ -1,5 +1,3 @@
-/* jshint expr: true */
-
 const { Async, IO } = require('crocks')
 const { expect } = require('chai')
 const h = require('snabbdom/h').default
