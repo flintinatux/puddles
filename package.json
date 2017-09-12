@@ -22,26 +22,25 @@
   "scripts": {
     "build": "browserify -s p index.js | buble > dist/puddles.js",
     "clean": "rm -rf dist && mkdir -p dist",
-    "hint": "jshint --reporter=node_modules/jshint-stylish .",
+    "lint": "eslint ducks lib test index.js",
     "postbuild": "uglifyjs dist/puddles.js -c -m > dist/puddles.min.js",
     "postversion": "git push --tags origin master",
-    "prebuild": "yarn run clean && yarn run hint",
-    "preversion": "git checkout master && yarn run build",
+    "prebuild": "yarn clean && yarn lint",
+    "preversion": "git checkout master && yarn build",
     "test": "mocha --reporter dot"
   },
   "dependencies": {
     "flyd": "^0.2.4",
-    "ramda": "^0.23.0",
+    "ramda": "^0.24.1",
     "snabbdom": "^0.6.7"
   },
   "devDependencies": {
     "browserify": "^13.1.0",
     "buble": "^0.13.1",
     "chai": "^3.5.0",
-    "crocks": "^0.4.1",
+    "crocks": "^0.7.1",
+    "eslint": "^4.6.1",
     "jsdom": "^9.12.0",
-    "jshint": "^2.9.4",
-    "jshint-stylish": "^2.2.1",
     "mocha": "^3.1.2",
     "raf": "^3.3.0",
     "uglify-js": "^2.7.3"

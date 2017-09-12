@@ -23,8 +23,8 @@ describe('p.mount', function() {
   var dispatch, root, state, teardown
 
   beforeEach(function (done) {
-    const elm = document.createElement('div'),
-          res = mount(elm, view, reducer)
+    const elm = document.createElement('div')
+    const res = mount(elm, view, reducer)
     dispatch  = res.dispatch
     root      = res.root
     state     = res.state
@@ -206,8 +206,8 @@ describe('p.mount', function() {
 
   describe('when called without a reducer', function() {
     beforeEach(function (done) {
-      const elm = document.createElement('div'),
-            res = mount(elm, view)
+      const elm = document.createElement('div')
+      const res = mount(elm, view)
       root  = res.root
       state = res.state
       expect(state()).to.be.undefined

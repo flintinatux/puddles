@@ -3,8 +3,8 @@ const { expect } = require('chai')
 const action = require('../lib/action')
 
 describe('p.action', function() {
-  const type    = 'TYPE',
-        payload = 'payload'
+  const type    = 'TYPE'
+  const payload = 'payload'
 
   describe('when supplied with a type and payload', function() {
     const a = action(type, payload)

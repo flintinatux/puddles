@@ -3,8 +3,8 @@ const { expect } = require('chai')
 const error = require('../lib/error')
 
 describe('p.error', function() {
-  const type = 'TYPE',
-        err  = new Error('this is an error')
+  const type = 'TYPE'
+  const err  = new Error('this is an error')
 
   describe('when supplied with a type and error', function() {
     const e = error(type, err)

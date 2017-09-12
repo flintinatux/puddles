@@ -29,8 +29,8 @@ describe('p.route', function() {
       '/user/:name': user
     })
 
-    const elm = document.createElement('div'),
-          res = mount(elm, view, reducer)
+    const elm = document.createElement('div')
+    const res = mount(elm, view, reducer)
     root  = res.root
     state = res.state
 
