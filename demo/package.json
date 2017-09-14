@@ -14,7 +14,8 @@
     "watch:templates": "pug -o dist -w src/*.pug"
   },
   "dependencies": {
-    "ramda": "^0.24.1"
+    "ramda": "^0.24.1",
+    "redux-thunk": "^2.2.0"
   },
   "devDependencies": {
     "browser-sync": "^2.18.13",

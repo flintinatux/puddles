@@ -2,7 +2,8 @@ const map  = require('ramda/src/map')
 const prop = require('ramda/src/prop')
 
 const ducks = {
-  hello: require('./hello')
+  counter: require('./counter'),
+  hello:   require('./hello')
 }
 
 exports.actions  = map(prop('actions'), ducks)

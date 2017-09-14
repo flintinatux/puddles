@@ -16,6 +16,6 @@ exports.reducer = p.handle(init, {
   [ SET_NAME ]: flip(assoc('name'))
 })
 
-const setName = p.action(SET_NAME)
-
-exports.actions = { setName }
+exports.actions = {
+  setName: p.action(SET_NAME)
+}
