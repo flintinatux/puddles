@@ -1,10 +1,8 @@
-const ducks = require('./ducks')
-const p     = require('../..')
-const view  = require('./views/hello')
+const actions = require('./ducks/actions')
+const p       = require('../..')
+const reducer = require('./ducks/reducer')
+const view    = require('./views/hello')
 
-const reducer = p.combine(ducks)
-const root    = document.body.querySelector('#root')
+const root = document.body.querySelector('#root')
 
-const { dispatch, state } = p.mount({ actions: ducks, reducer, root, view })
-
-p.devTools(dispatch, state)
+const { dispatch } = p.mount({ actions, reducer, root, view })

@@ -12,10 +12,10 @@ const init = {
   name: 'world'
 }
 
-const reducer = p.handle(init, {
+exports.reducer = p.handle(init, {
   [ SET_NAME ]: flip(assoc('name'))
 })
 
-reducer.setName = p.action(SET_NAME)
+const setName = p.action(SET_NAME)
 
-module.exports = reducer
+exports.actions = { setName }
