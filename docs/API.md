@@ -1,21 +1,22 @@
 # API docs
 
-The `puddles` api has a small surface-area by design, and was inspired by other excellent vdom libraries such as [mithril](http://mithril.js.org/) and [snabbdom](https://github.com/paldepind/snabbdom), the latter of which provides the underlying vdom implementation and [hyperscript function](#pselector-data-children).
+The `puddles` api has a small surface-area by design, and was inspired by other excellent vdom libraries such as [mithril](http://mithril.js.org/) and [snabbdom](https://github.com/paldepind/snabbdom), the latter of which provides the underlying vdom implementation and [hyperscript function](#p).
 
-- [p](#p)                  - hyperscript function
-- [p.action](#paction)     - curried action creator
-- [p.combine](#pcombine)   - reducer composer
-- [p.devTools](#pdevtools) - opt-in Redux DevTools integration
-- [p.error](#perror)       - curried error-action creator
-- [p.handle](#phandle)     - multi-action reducer factory
-- [p.href](#phref)         - `hashchange` route path helper
-- [p.mount](#pmount)       - mounts a `puddles` app into the DOM
-- [p.route](#proute)       - light-weight `hashchange` router
+| Function | Signature | Description |
+| -------- | --------- | ----------- |
+| [`p`](#p) | `(String, Object, [Vnode]) -> Vnode` | hyperscript function |
+| [`p.action`](#paction) | `String -> a -> Action` | curried action creator |
+| [`p.combine`](#pcombine) | `{ k: ((a, Action) -> a) } -> { k: a } -> Action -> { k: a }` | reducer composer |
+| [`p.error`](#perror) | `String -> Error -> Action` | curried error-action creator |
+| [`p.handle`](#phandle) | `a -> { k: ((a, Action) -> a) } -> (a, Action) -> a` | multi-action reducer factory |
+| [`p.href`](#phref) | `String -> String` | `hashchange` route path helper |
+| [`p.mount`](#pmount) |  | mounts an app into the DOM |
+| [`p.route`](#proute) |  | light-weight `hashchange` router |
 
 ### p
 
 ```haskell
-(String, Object, [Vnode]) -> Vnode
+p : (String, Object, [Vnode]) -> Vnode
 ```
 
 #### Parameters
@@ -32,12 +33,12 @@ The `puddles` api has a small surface-area by design, and was inspired by other 
 - Vnode<br/>
   Learn more about the vnode format [here](https://github.com/paldepind/snabbdom#virtual-node).
 
-The `p` hyperscript function is a direct export of `snabbdom/h`, so I recommend reading its own [comprehensive documentation](https://github.com/paldepind/snabbdom#snabbdomh).  However, I've made a couple important modifications to the modules used by the `snabbdom/patch` function, which are described [below]().
+The `p` hyperscript function is a direct export of `snabbdom/h`, so I recommend reading its own [comprehensive documentation](https://github.com/paldepind/snabbdom#snabbdomh).
 
 ### p.action
 
 ```haskell
-String -> a -> Action
+p.action : String -> a -> Action
 ```
 
 #### Parameters
@@ -45,30 +46,28 @@ String -> a -> Action
 - String `type` <br/>
   The action type, traditionally uppercase, but that is not enforced.
 - any `payload` <br/>
-  The action payload, can be any serializable value, or a `thenable`, `forkable`, or `runnable` ADT.
+  The action payload, can be any serializable value.
 
 #### Returns
 
 - Action <br/>
   An [FSA-compliant](https://github.com/acdlite/flux-standard-action) action with the format `{ type, payload }`.
 
-If the `payload` is a `thenable`, `forkable`, or `runnable` ADT, the dispatcher will first execute the async action defined by the payload, and then dispatch a new action of the same `type` with the resolved value.
+See also [`p.error`](#perror), [`p.handle`](#phandle).
 
 ```js
 const p = require('puddles')
 
-p.action('TOGGLE', 42)
-//> { type: 'TOGGLE', payload: 42 }
+p.action('TOGGLE', 42) //=> { type: 'TOGGLE', payload: 42 }
 
 const sendEmail = p.action('SEND_EMAIL')
-sendEmail({ to: 'example@email.com' })
-//> { type: 'SEND_EMAIL', payload: { to: 'example@email.com' } }
+sendEmail({ to: 'example@email.com' }) //=> { type: 'SEND_EMAIL', payload: { to: 'example@email.com' } }
 ```
 
 ### p.combine
 
 ```haskell
-Object -> (a, Action) -> a
+p.combine : { k: ((a, Action) -> a) } -> { k: a } -> Action -> { k: a }
 ```
 
 #### Parameters
@@ -85,7 +84,7 @@ The shape of the state object matches the keys of the passed `reducers`.  Especi
 
 ```js
 const merge = require('ramda/src/merge')
-const p = require('puddles')
+const p     = require('puddles')
 
 const counter = p.handle(0, {
   DEC: x => x - 1,
@@ -98,46 +97,15 @@ const pet = p.handle({ name: null }, {
 
 const reducer = p.combine({ counter, pet })
 
-reducer(undefined, {})
-//> { counter: 0, pet: { name: null } }
-```
-
-### p.devTools
-
-```haskell
-Stream -> Stream -> Object
-```
-
-#### Parameters
-
-- Stream `dispatch` <br/>
-  The dispatch stream returned by [`p.mount`](#pmount).
-- Stream `state` <br/>
-  The state stream returned by [`p.mount`](#pmount).
-
-#### Returns
-
-- Object <br/>
-  The [Redux DevTools](http://extension.remotedev.io/) extension [interface object](http://extension.remotedev.io/docs/API/Methods.html#connectoptions)
-
-Useful for debugging.  Harness the full time-travel power of the DevTools!
-
-```js
-const { dispatch, state } = p.mount(root, view, reducer)
-
-// poor man's debugging
-const logger = console.log.bind(console)
-dispatch.map(logger)
-state.map(logger)
-
-// much better debugging
-p.devTools(dispatch, state)
+let state
+state = reducer(undefined, {}) //=> { counter: 0, pet: { name: null } }
+state = reducer(state, p.action('NAME', 'Spot')) //=> { counter: 0, pet: { name: 'Spot' } }
 ```
 
 ### p.error
 
 ```haskell
-String -> Error -> Action
+p.error : String -> Error -> Action
 ```
 
 #### Parameters
@@ -159,18 +127,16 @@ When an error-action is dispatched, the payload will be the supplied error, and 
 ```js
 const p = require('puddles')
 
-p.error('FETCH_USER', new Error('fetch failed'))
-//> { type: 'FETCH_USER', payload: Error(...), error: true }
+p.error('FETCH_USER', new Error('fetch failed')) //=> { type: 'FETCH_USER', payload: Error(...), error: true }
 
 const sendEmail = p.error('SEND_EMAIL')
-sendEmail(new Error('mailbox full'))
-//> { type: 'SEND_EMAIL', payload: Error(...), error: true }
+sendEmail(new Error('mailbox full')) //=> { type: 'SEND_EMAIL', payload: Error(...), error: true }
 ```
 
 ### p.handle
 
 ```haskell
-a -> { k: ((a, Action) -> a) } -> (a, Action) -> a
+p.handle : a -> { k: ((a, Action) -> a) } -> (a, Action) -> a
 ```
 
 #### Parameters
@@ -214,7 +180,7 @@ state = reducer(state, p.action('NOT_HANDLED', null))
 ### p.href
 
 ```haskell
-String -> String
+p.href : String -> String
 ```
 
 #### Parameters
@@ -296,7 +262,7 @@ p.mount(root, view, reducer)
 ### p.route
 
 ```haskell
-String -> { k: (a -> Vnode) } -> a -> Vnode
+p.route : String -> { k: View } -> Object
 ```
 
 #### Parameters
