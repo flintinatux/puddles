@@ -4,9 +4,11 @@ const p     = require('../../..')
 const Layout = (Child, actions, state) =>
   p('div.layout', [
     p('div.nav', [
-      p('a', { attrs: { href: p.href('/hello') } }, 'Hello'),
+      p.link({ actions, attrs: { href: '/hello' } }, 'Hello'),
       p('span', { props: { innerHTML: '&nbsp;&nbsp;' } }),
-      p('a', { attrs: { href: p.href('/counter') } }, 'Counter')
+      p.link({ actions, attrs: { href: '/counter' } }, 'Counter'),
+      p('span', { props: { innerHTML: '&nbsp;&nbsp;' } }),
+      p.link({ actions, attrs: { href: '/bad' } }, 'Bad')
     ]),
     p('br'),
     p('div.content', [

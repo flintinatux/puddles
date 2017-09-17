@@ -1,18 +1,18 @@
-const assoc = require('ramda/src/assoc')
+const merge = require('ramda/src/merge')
 const p     = require('../..')
-const thunk = require('redux-thunk').default
 
 const ducks = require('./ducks')
 
-const router = p.route('/hello', {
+const router = p.route({
+  '/':        require('./views/hello'),
   '/counter': require('./views/counter'),
-  '/hello':   require('./views/hello')
+  '/hello':   require('./views/hello'),
+  '/*':       () => p('h1', '404')
 })
 
-const actions    = assoc('route', router.actions, ducks.actions)
-const reducer    = p.combine(assoc('route', router.reducer, ducks.reducers))
-const middleware = [ thunk ]
-const root       = document.body.querySelector('#root')
-const { view }   = router
+const actions  = merge(ducks.actions, router.actions)
+const reducer  = p.combine(merge(ducks.reducers, router.reducers))
+const root     = document.body.querySelector('#root')
+const { view } = router
 
-const { dispatch } = p.mount({ actions, middleware, reducer, root, view })
+const { dispatch } = p.mount({ actions, reducer, root, view })

@@ -10,8 +10,8 @@ The `puddles` api has a small surface-area by design, and was inspired by other 
 | [`p.error`](#perror) | `String -> Error -> Action` | curried error-action creator |
 | [`p.handle`](#phandle) | `a -> { k: ((a, Action) -> a) } -> (a, Action) -> a` | multi-action reducer factory |
 | [`p.href`](#phref) | `String -> String` | `hashchange` route path helper |
-| [`p.mount`](#pmount) |  | mounts an app into the DOM |
-| [`p.route`](#proute) |  | light-weight `hashchange` router |
+| [`p.mount`](#pmount) | `Object -> Object` | mounts an app into the DOM |
+| [`p.route`](#proute) | `String -> { k: View } -> Object` | light-weight `hashchange` router |
 
 ### p
 
@@ -193,7 +193,7 @@ p.href : String -> String
 - String `hashPath` <br/>
   Path prepended by the value of `p.route.prefix`.
 
-The router created by `p.route` uses a routing strategy triggered by the `hashchange` event. This means that all of your links must have `href` attributes prefixed by the value of `p.route.prefix`, which defaults to `#!` (mostly for [tradition](https://webmasters.googleblog.com/2015/10/deprecating-our-ajax-crawling-scheme.html)).  Of course you could just always remember to prefix your own route links, but calling `p.href()` is sometimes simpler to remember.
+The router created by `p.route` uses a routing strategy triggered by the `hashchange` event. This means that all of your links must have `href` attributes prefixed by `#!` (the traditional [hashbang](https://webmasters.googleblog.com/2015/10/deprecating-our-ajax-crawling-scheme.html)).  Of course you could just always remember to prefix your own route links, but calling `p.href()` is sometimes simpler to remember.
 
 ```js
 const p = require('puddles')
@@ -207,7 +207,7 @@ const view = state =>
 ### p.mount
 
 ```haskell
-(Element, (a -> Vnode), ((a, Action) -> a)) -> Object
+p.mount : Object -> Object
 ```
 
 #### Parameters
