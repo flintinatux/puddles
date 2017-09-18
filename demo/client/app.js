@@ -15,4 +15,4 @@ const reducer  = p.combine(merge(ducks.reducers, router.reducers))
 const root     = document.body.querySelector('#root')
 const { view } = router
 
-const { dispatch } = p.mount({ actions, reducer, root, view })
+p.mount({ actions, reducer, root, view })

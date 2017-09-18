@@ -1,14 +1,14 @@
 const curry = require('ramda/src/curry')
 const p     = require('../../..')
 
+const style = { marginRight: '10px' }
+
 const Layout = (Child, actions, state) =>
   p('div.layout', [
     p('div.nav', [
-      p.link({ actions, attrs: { href: '/hello' } }, 'Hello'),
-      p('span', { props: { innerHTML: '&nbsp;&nbsp;' } }),
-      p.link({ actions, attrs: { href: '/counter' } }, 'Counter'),
-      p('span', { props: { innerHTML: '&nbsp;&nbsp;' } }),
-      p.link({ actions, attrs: { href: '/bad' } }, 'Bad')
+      p('a', { link: { href: '/hello' }, style }, 'Hello'),
+      p('a', { link: { href: '/counter' }, style }, 'Counter'),
+      p('a', { link: { href: '/bad' }, style }, 'Bad')
     ]),
     p('br'),
     p('div.content', [
