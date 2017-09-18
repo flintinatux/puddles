@@ -4,23 +4,21 @@
   "description": "Puddles demo",
   "author": "flintinatux",
   "license": "ISC",
+  "main": "server/index.js",
   "scripts": {
     "clean": "rm -rf dist && mkdir -p dist",
-    "prewatch": "yarn run clean",
-    "prewatch:styles": "yarn run build:styles",
-    "serve": "browser-sync start -s dist -f dist --port 3000 --no-open --no-notify --extensions *.html",
-    "watch": "run-p watch:*",
-    "watch:scripts": "watchify src/app.js -d -v -o 'exorcist dist/app.js.map > dist/app.js'",
-    "watch:templates": "pug -o dist -w src/*.pug"
+    "prewatch": "yarn clean",
+    "start": "nodemon -w server",
+    "watch": "watchify client/app.js -d -v -o 'exorcist dist/app.js.map > dist/app.js'"
   },
   "dependencies": {
+    "paperplane": "^1.0.2",
+    "pug": "^2.0.0-rc.4",
     "ramda": "^0.24.1"
   },
   "devDependencies": {
-    "browser-sync": "^2.18.13",
     "exorcist": "^0.4.0",
-    "npm-run-all": "^4.1.1",
-    "pug-cli": "^1.0.0-alpha6",
+    "nodemon": "^1.12.1",
     "watchify": "^3.9.0"
   }
 }

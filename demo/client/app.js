@@ -7,7 +7,7 @@ const router = p.route({
   '/':        require('./views/hello'),
   '/counter': require('./views/counter'),
   '/hello':   require('./views/hello'),
-  '/:any...': require('./views/not-found')
+  '/:404+':   require('./views/not-found')
 })
 
 const actions  = merge(ducks.actions, router.actions)
