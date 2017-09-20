@@ -1,5 +1,5 @@
 require('pug/register')
-const { compose, dissocPath } = require('ramda')
+const { compose, dissocPath } = require('tinyfunk')
 const http = require('http')
 const { html, logger, methods, mount, routes, static } = require('paperplane')
 

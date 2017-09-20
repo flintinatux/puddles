@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Puddles demo",
   "author": "flintinatux",
-  "license": "ISC",
+  "license": "MIT",
   "main": "server/index.js",
   "scripts": {
     "clean": "rm -rf dist && mkdir -p dist",
@@ -13,8 +13,7 @@
   },
   "dependencies": {
     "paperplane": "^1.0.2",
-    "pug": "^2.0.0-rc.4",
-    "ramda": "^0.24.1"
+    "pug": "^2.0.0-rc.4"
   },
   "devDependencies": {
     "exorcist": "^0.4.0",

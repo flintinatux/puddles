@@ -1,7 +1,4 @@
-const assoc  = require('ramda/src/assoc')
-const concat = require('ramda/src/concat')
-const flip   = require('ramda/src/flip')
-
+const { assoc, concat, flip } = require('tinyfunk')
 const p = require('../../..')
 
 const ns = concat('demo/hello/')

@@ -1,5 +1,5 @@
-const curry = require('ramda/src/curry')
-const p     = require('../../..')
+const { curry } = require('tinyfunk')
+const p = require('../../..')
 
 const Layout = require('./layout')
 

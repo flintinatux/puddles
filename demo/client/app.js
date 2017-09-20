@@ -1,5 +1,5 @@
-const merge = require('ramda/src/merge')
-const p     = require('../..')
+const { merge } = require('tinyfunk')
+const p = require('../..')
 
 const ducks = require('./ducks')
 

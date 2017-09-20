@@ -1,7 +1,7 @@
 {
   "name": "puddles",
   "version": "1.0.1",
-  "description": "Tiny redux-inspired vdom app framework",
+  "description": "Tiny turnkey Redux vdom app framework",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/flintinatux/puddles.git"
@@ -13,7 +13,7 @@
     "vdom"
   ],
   "author": "flintinatux",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/flintinatux/puddles/issues"
   },
@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "browserify": "^13.1.0",
-    "buble": "^0.13.1",
+    "buble": "^0.15.2",
     "chai": "^3.5.0",
     "crocks": "^0.7.1",
     "eslint": "^4.6.1",

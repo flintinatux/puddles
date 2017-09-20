@@ -1,7 +1,4 @@
-const add    = require('ramda/src/add')
-const concat = require('ramda/src/concat')
-const evolve = require('ramda/src/evolve')
-
+const { add, concat, evolve } = require('tinyfunk')
 const p = require('../../..')
 
 const ns = concat('demo/counter/')

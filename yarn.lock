@@ -377,9 +377,9 @@ browserify@^13.1.0:
     vm-browserify "~0.0.1"
     xtend "^4.0.0"
 
-buble@^0.13.1:
-  version "0.13.2"
-  resolved "https://registry.yarnpkg.com/buble/-/buble-0.13.2.tgz#5c4572728384ea704f1dc9e7a5da166c0d7ee2e4"
+buble@^0.15.2:
+  version "0.15.2"
+  resolved "https://registry.yarnpkg.com/buble/-/buble-0.15.2.tgz#547fc47483f8e5e8176d82aa5ebccb183b02d613"
   dependencies:
     acorn "^3.3.0"
     acorn-jsx "^3.0.1"

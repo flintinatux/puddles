@@ -1,10 +1,9 @@
-const map  = require('ramda/src/map')
-const prop = require('ramda/src/prop')
+const { mapObj, prop } = require('tinyfunk')
 
 const ducks = {
   counter: require('./counter'),
   hello:   require('./hello')
 }
 
-exports.actions  = map(prop('actions'), ducks)
-exports.reducers = map(prop('reducer'), ducks)
+exports.actions  = mapObj(prop('actions'), ducks)
+exports.reducers = mapObj(prop('reducer'), ducks)
