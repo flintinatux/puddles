@@ -1,18 +1,14 @@
-const { merge } = require('tinyfunk')
 const p = require('../..')
 
-const ducks = require('./ducks')
+const { actions, reducers } = require('./ducks')
 
-const router = p.route({
+const root = document.body.querySelector('#root')
+
+const routes = {
   '/':        require('./views/hello'),
   '/counter': require('./views/counter'),
   '/hello':   require('./views/hello'),
   '/:404+':   require('./views/not-found')
-})
+}
 
-const actions  = merge(ducks.actions, router.actions)
-const reducer  = p.combine(merge(ducks.reducers, router.reducers))
-const root     = document.body.querySelector('#root')
-const { view } = router
-
-p.mount({ actions, reducer, root, view })
+p.mount({ actions, reducers, root, routes })
