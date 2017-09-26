@@ -23,10 +23,10 @@
     "build": "browserify -s p index.js | buble > dist/puddles.js",
     "clean": "rm -rf dist && mkdir -p dist",
     "lint": "eslint demo/client lib test index.js",
-    "postbuild": "uglifyjs dist/puddles.js -c -m > dist/puddles.min.js",
+    "postbuild": "uglifyjs dist/puddles.js -cm > dist/puddles.min.js",
     "postversion": "git push --tags origin master",
-    "prebuild": "yarn clean && yarn lint",
-    "preversion": "git checkout master && yarn build",
+    "prebuild": "yarn run clean && yarn run lint",
+    "preversion": "git checkout master && yarn run build",
     "test": "mocha --reporter dot"
   },
   "dependencies": {
@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "browserify": "^13.1.0",
-    "buble": "^0.15.2",
+    "buble": "^0.16.0",
     "chai": "^3.5.0",
     "crocks": "^0.7.1",
     "eslint": "^4.6.1",
@@ -42,6 +42,6 @@
     "mocha": "^3.1.2",
     "raf": "^3.3.0",
     "ramda": "^0.24.1",
-    "uglify-js": "^2.7.3"
+    "uglify-js": "^3.1.2"
   }
 }
