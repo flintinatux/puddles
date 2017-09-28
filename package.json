@@ -30,7 +30,8 @@
     "test": "mocha --reporter dot"
   },
   "dependencies": {
-    "snabbdom": "^0.7.0"
+    "snabbdom": "^0.7.0",
+    "tinyfunk": "^0.0.1"
   },
   "devDependencies": {
     "browserify": "^13.1.0",

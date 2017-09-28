@@ -1987,6 +1987,10 @@ timers-browserify@^1.0.1:
   dependencies:
     process "~0.11.0"
 
+tinyfunk@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/tinyfunk/-/tinyfunk-0.0.1.tgz#5b81e030a75a56ae1935957ddb9be06a10aaf45b"
+
 tmp@^0.0.31:
   version "0.0.31"
   resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.0.31.tgz#8f38ab9438e17315e5dbd8b3657e8bfb277ae4a7"

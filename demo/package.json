@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "paperplane": "^1.0.2",
-    "pug": "^2.0.0-rc.4"
+    "pug": "^2.0.0-rc.4",
+    "tinyfunk": "^0.0.1"
   },
   "devDependencies": {
     "exorcist": "^0.4.0",

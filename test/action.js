@@ -1,24 +1,16 @@
 const { expect } = require('chai')
 
-const { action } = require('..')
+const p = require('..')
 
 describe('p.action', () => {
   const type    = 'TYPE'
   const payload = 'payload'
 
-  describe('when supplied with a type and payload', () => {
-    const axn = action(type, payload)
+  it('creates an FSA-style action', () =>
+    expect(p.action(type, payload)).to.eql({ type, payload })
+  )
 
-    it('creates an FSA-style action', () => {
-      expect(axn).to.eql({ type, payload })
-    })
-  })
-
-  describe('when supplied with just a type', () => {
-    const axn = action(type)(payload)
-
-    it('curries to form an action creator', () => {
-      expect(axn).to.eql({ type, payload })
-    })
-  })
+  it('is curried', () =>
+    expect(p.action(type)(payload)).to.eql({ type, payload })
+  )
 })

@@ -1,12 +1,10 @@
 const { expect } = require('chai')
 
-const action = require('../lib/action')
-const error  = require('../lib/error')
-const handle = require('../lib/handle')
+const p = require('..')
 
 const init = 0
 
-const reducer = handle(init, {
+const reducer = p.handle(init, {
   ADD: (count, step, error) => error ? step : count + step
 })
 
@@ -22,18 +20,18 @@ describe('p.handle', function() {
   })
 
   it('handles specified actions', function() {
-    state = reducer(state, action('ADD', 2))
+    state = reducer(state, p.action('ADD', 2))
     expect(state).to.equal(2)
   })
 
   it('ignores unspecified actions', function() {
-    state = reducer(state, action('SUB', 2))
+    state = reducer(state, p.action('SUB', 2))
     expect(state).to.equal(0)
   })
 
   it('passes true as third arg for error actions', function() {
     const err = new Error('an error')
-    state = reducer(state, error('ADD', err))
+    state = reducer(state, p.error('ADD', err))
     expect(state).to.equal(err)
   })
 })
