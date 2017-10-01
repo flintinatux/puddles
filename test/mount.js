@@ -1,21 +1,29 @@
 const { expect } = require('chai')
+const promise    = require('redux-promise')
 const spy        = require('@articulate/spy')
 
 const p = require('..')
-const { wait } = require('./lib/util')
+
+const wait = fn =>
+  setTimeout(fn, 32)
 
 describe('p.mount', () => {
   const actions = {
     counter: {
-      add: p.action('ADD')
+      add:     p.action('ADD'),
+      promise: a => Promise.resolve(a).then(p.action('RESET')),
+      thunk:   a => dispatch => dispatch(p.action('RESET', a))
     }
   }
+
+  const middleware = [ promise ]
 
   const redraw = spy()
 
   const reducers = {
     counter: p.handle(0, {
-      ADD: (a, b) => a + b
+      ADD:   (a, b) => a + b,
+      RESET: (a, b) => b
     })
   }
 
@@ -65,7 +73,7 @@ describe('p.mount', () => {
     redraw.reset()
   )
 
-  describe('with a plain view', () => {
+  describe('with basic options', () => {
     beforeEach(done => {
       const root = document.createElement('div')
       document.body.appendChild(root)
@@ -117,6 +125,39 @@ describe('p.mount', () => {
       document.getElementById('plus').click()
       wait(() => {
         expect(elm.value).to.equal('1')
+        done()
+      })
+    })
+
+    it('includes thunk middleware', () => {
+      expect(getState().counter).to.equal(0)
+      dispatch(actions.counter.thunk(5))
+      expect(getState().counter).to.equal(5)
+    })
+  })
+
+  describe('with additional middleware', () => {
+    beforeEach(done => {
+      const root = document.createElement('div')
+      document.body.appendChild(root)
+      view = Counter
+      store = p.mount({ actions, middleware, reducers, root, view })
+      dispatch = store.dispatch
+      getState = store.getState
+      wait(done)
+    })
+
+    it('prepends thunk middleware', () => {
+      expect(getState().counter).to.equal(0)
+      dispatch(actions.counter.thunk(5))
+      expect(getState().counter).to.equal(5)
+    })
+
+    it('uses the supplied middleware', done => {
+      expect(getState().counter).to.equal(0)
+      dispatch(actions.counter.promise(5))
+      wait(() => {
+        expect(getState().counter).to.equal(5)
         done()
       })
     })

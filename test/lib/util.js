@@ -1,2 +1,2 @@
-exports.wait = fn =>
-  setTimeout(fn, 32)
+// exports.wait = fn =>
+//   setTimeout(fn, 32)
