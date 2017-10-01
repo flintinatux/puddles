@@ -46,39 +46,47 @@ describe('p.mount', () => {
       p('div#id', state.route.params.id)
     ])
 
-  const Home = (actions, state) =>
+  const Home = () =>
     p('div#home')
 
   const Layout = Child => (actions, state) =>
     p('div#layout', [
       p('div.nav', [
-        p('a', { link: { href: '/'        } }, 'Home'),
-        p('a', { link: { href: '/counter' } }, 'Counter'),
-        p('a', { link: { href: '/foo/123' } }, 'Detail')
+        p('a#link-home',    { link: { href: '/'        } }, 'Home'),
+        p('a#link-counter', { link: { href: '/counter' } }, 'Counter'),
+        p('a#link-detail',  { link: { href: '/foo/123' } }, 'Detail'),
+        p('a#link-bad',     { link: { href: '/bad'     } }, 'Bad')
       ]),
       p('div.content', [
         Child(actions, state)
       ])
     ])
 
+  const NotFound = () =>
+    p('div#not-found')
+
   const routes = {
     '/':        Layout(Home),
     '/counter': Layout(Counter),
-    '/foo/:id': Layout(Detail)
+    '/foo/:id': Layout(Detail),
+    '/:404+':   Layout(NotFound)
   }
 
-  let dispatch, getState, store, view
+  let dispatch, getState, root, store
 
-  afterEach(() =>
+  beforeEach(() => {
+    root = document.createElement('div')
+    document.body.appendChild(root)
+  })
+
+  afterEach(() => {
     redraw.reset()
-  )
+    store.teardown()
+  })
 
   describe('with basic options', () => {
     beforeEach(done => {
-      const root = document.createElement('div')
-      document.body.appendChild(root)
-      view = Counter
-      store = p.mount({ actions, reducers, root, view })
+      store = p.mount({ actions, reducers, root, view: Counter })
       dispatch = store.dispatch
       getState = store.getState
       wait(done)
@@ -95,8 +103,16 @@ describe('p.mount', () => {
       expect(getState()).to.eql({ counter: 0 })
     })
 
+    it('returns a store with a teardown function', () => {
+      expect(store.teardown).to.be.a('function')
+      store.teardown()
+      expect(document.getElementById('counter')).not.to.exist
+      dispatch(actions.counter.add(2))
+      expect(getState()).to.eql({ counter: 0 })
+    })
+
     it('mounts the view', () =>
-      expect(document.body.firstChild.id).to.equal('counter')
+      expect(document.getElementById('counter')).to.exist
     )
 
     it('redraws after actions are dispatched', done => {
@@ -138,10 +154,7 @@ describe('p.mount', () => {
 
   describe('with additional middleware', () => {
     beforeEach(done => {
-      const root = document.createElement('div')
-      document.body.appendChild(root)
-      view = Counter
-      store = p.mount({ actions, middleware, reducers, root, view })
+      store = p.mount({ actions, middleware, reducers, root, view: Counter })
       dispatch = store.dispatch
       getState = store.getState
       wait(done)
@@ -159,6 +172,71 @@ describe('p.mount', () => {
       wait(() => {
         expect(getState().counter).to.equal(5)
         done()
+      })
+    })
+  })
+
+  describe('with routes supplied', () => {
+    beforeEach(done => {
+      store = p.mount({ actions, reducers, root, routes })
+      dispatch = store.dispatch
+      getState = store.getState
+      wait(done)
+    })
+
+    it('adds a route reducer', () =>
+      expect(getState().route).to.eql({
+        params: {},
+        path: '/',
+        pattern: '/'
+      })
+    )
+
+    it('renders the current route', () =>
+      expect(document.getElementById('home')).to.exist
+    )
+
+    it('wires up link.href with pushState', done => {
+      document.getElementById('link-counter').click()
+      wait(() => {
+        expect(location.href).to.equal('/counter')
+        expect(document.getElementById('counter')).to.exist
+        done()
+      })
+    })
+
+    it('parses route params', done => {
+      document.getElementById('link-detail').click()
+      wait(() => {
+        expect(location.href).to.equal('/foo/123')
+        expect(getState().route.params.id).to.equal('123')
+        expect(document.getElementById('id').innerHTML).to.equal('123')
+        done()
+      })
+    })
+
+    it('multi-matches with the + symbol', done => {
+      document.getElementById('link-bad').click()
+      wait(() => {
+        expect(location.href).to.equal('/bad')
+        expect(getState().route.pattern).to.equal('/:404+')
+        expect(document.getElementById('not-found')).to.exist
+        done()
+      })
+    })
+
+    it('listens for popstate to navigate back', done => {
+      document.getElementById('link-counter').click()
+      wait(() => {
+        expect(getState().route.path).to.equal('/counter')
+        location.href = '/'
+        const event = document.createEvent('Event')
+        event.initEvent('popstate', true, true)
+        dispatchEvent(event)
+        wait(() => {
+          expect(getState().route.path).to.equal('/')
+          done()
+        })
       })
     })
   })
