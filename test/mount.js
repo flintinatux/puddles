@@ -59,7 +59,7 @@ describe('p.mount', () => {
     '/foo/:id': Layout(Detail)
   }
 
-  let dispatch, getState, root, store, view
+  let dispatch, getState, store, view
 
   afterEach(() =>
     redraw.reset()
@@ -67,8 +67,7 @@ describe('p.mount', () => {
 
   describe('with a plain view', () => {
     beforeEach(done => {
-      root = document.createElement('div')
-      root.id = 'root'
+      const root = document.createElement('div')
       document.body.appendChild(root)
       view = Counter
       store = p.mount({ actions, reducers, root, view })
@@ -112,12 +111,12 @@ describe('p.mount', () => {
       })
     })
 
-    it('composes actions with dispatch', () => {
+    it('composes actions with dispatch', done => {
       const elm = document.getElementById('count')
       expect(elm.value).to.equal('0')
       document.getElementById('plus').click()
       wait(() => {
-        expect(elm.value).to.equal('0')
+        expect(elm.value).to.equal('1')
         done()
       })
     })
