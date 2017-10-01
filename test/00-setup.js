@@ -1,24 +1,44 @@
-// require('raf').polyfill()
-// const Emitter   = require('events')
-// const { jsdom } = require('jsdom')
+require('raf').polyfill()
+const Emitter   = require('events')
+const { jsdom } = require('jsdom')
+const URL       = require('url')
 
-// const emitter = new Emitter()
-// global.addEventListener = emitter.on.bind(emitter)
-// global.document = jsdom()
+const emitter = new Emitter()
+global.addEventListener = emitter.on.bind(emitter)
+global.document = jsdom()
 
-// global.location = {
-//   get hash() {
-//     return this._hash || ''
-//   },
+global.history = {
+  pushState(state, title, href) {
+    location.href = href
+  }
+}
 
-//   set hash(x) {
-//     this._hash = x
-//     emitter.emit('hashchange')
-//     return x
-//   }
-// }
+global.location = {
+  // get hash() {
+  //   return this._hash || ''
+  // },
 
-// afterEach(function() {
-//   emitter.removeAllListeners()
-//   global.location.hash = ''
-// })
+  // set hash(x) {
+  //   this._hash = x
+  //   emitter.emit('hashchange')
+  //   return x
+  // },
+
+  set href(href) {
+    this._href = href
+  },
+
+  get pathname() {
+    return URL.parse(this._href).pathname
+  },
+
+  get search() {
+    return URL.parse(this._href).search
+  }
+}
+
+afterEach(function() {
+  emitter.removeAllListeners()
+  global.location.href = ''
+  document.body.innerHTML = ''
+})

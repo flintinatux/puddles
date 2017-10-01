@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@articulate/spy@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@articulate/spy/-/spy-0.0.1.tgz#2da9fdb919075fa5fc3868017e17b43b8528a399"
+
 JSONStream@^1.0.3:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/JSONStream/-/JSONStream-1.2.1.tgz#32aa5790e799481083b49b4b7fa94e23bae69bf9"

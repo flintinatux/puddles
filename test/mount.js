@@ -1,222 +1,125 @@
-const { Async, IO } = require('crocks')
 const { expect } = require('chai')
-const h = require('snabbdom/h').default
+const spy        = require('@articulate/spy')
 
-const action = require('../lib/action')
-const handle = require('../lib/handle')
-const mount  = require('../lib/mount')
+const p = require('..')
+const { wait } = require('./lib/util')
 
-const { spy, wait } = require('./lib/util')
+describe('p.mount', () => {
+  const actions = {
+    counter: {
+      add: p.action('ADD')
+    }
+  }
 
-const add = action('ADD')
+  const redraw = spy()
 
-const reducer = handle(0, {
-  ADD: (count, step, error) => error ? step : count + step
-})
+  const reducers = {
+    counter: p.handle(0, {
+      ADD: (a, b) => a + b
+    })
+  }
 
-const view = state =>
-  h('div.foo', {
-    on: { click: [ add, 2 ] }
-  }, state)
+  const Counter = (actions, state) => {
+    const { counter: { add } } = actions
+    redraw()
 
-describe('p.mount', function() {
-  var dispatch, root, state, teardown
+    return p('div#counter', [
+      p('input#count', {
+        attrs: { readonly: true },
+        props: { value: state.counter }
+      }),
+      p('button#minus', { on: { click: [ add, -1 ]} }, '-'),
+      p('button#plus',  { on: { click: [ add,  1 ]} }, '+')
+    ])
+  }
 
-  beforeEach(function (done) {
-    const elm = document.createElement('div')
-    const res = mount(elm, view, reducer)
-    dispatch  = res.dispatch
-    root      = res.root
-    state     = res.state
-    teardown  = res.teardown
-    expect(state()).to.equal(0)
-    wait(done)
-  })
+  const Detail = (actions, state) =>
+    p('div#detail', [
+      p('div#id', state.route.params.id)
+    ])
 
-  afterEach(function() {
-    teardown()
-  })
+  const Home = (actions, state) =>
+    p('div#home')
 
-  it('returns a dispatch stream', function() {
-    expect(dispatch).to.be.a('function')
-    dispatch(add(2))
-    expect(state()).to.equal(2)
-  })
+  const Layout = Child => (actions, state) =>
+    p('div#layout', [
+      p('div.nav', [
+        p('a', { link: { href: '/'        } }, 'Home'),
+        p('a', { link: { href: '/counter' } }, 'Counter'),
+        p('a', { link: { href: '/foo/123' } }, 'Detail')
+      ]),
+      p('div.content', [
+        Child(actions, state)
+      ])
+    ])
 
-  it('returns a state stream', function() {
-    expect(state).to.be.a('function')
-    expect(state()).to.equal(0)
-  })
+  const routes = {
+    '/':        Layout(Home),
+    '/counter': Layout(Counter),
+    '/foo/:id': Layout(Detail)
+  }
 
-  it('returns a root vnode stream', function() {
-    expect(root).to.be.a('function')
-    expect(root().sel).to.equal('div.foo')
-  })
+  let dispatch, getState, root, store, view
 
-  describe('returns a teardown function, that when called', function() {
-    beforeEach(function() {
-      expect(teardown).to.be.a('function')
-      teardown()
+  afterEach(() =>
+    redraw.reset()
+  )
+
+  describe('with a plain view', () => {
+    beforeEach(done => {
+      root = document.createElement('div')
+      root.id = 'root'
+      document.body.appendChild(root)
+      view = Counter
+      store = p.mount({ actions, reducers, root, view })
+      dispatch = store.dispatch
+      getState = store.getState
+      wait(done)
     })
 
-    it('patches the root to be an empty div', function() {
-      expect(root().sel).to.equal('div')
-      expect(root().children).to.be.undefined
+    it('returns a store with a dispatch function', () => {
+      expect(dispatch).to.be.a('function')
+      dispatch(actions.counter.add(2))
+      expect(getState()).to.eql({ counter: 2 })
     })
 
-    it('ends all the streams', function() {
-      expect(dispatch.end()).to.be.true
-      expect(root.end()).to.be.true
-      expect(state.end()).to.be.true
-      dispatch(add(2))
-      expect(state()).to.equal(0)
+    it('returns a store with a getState function', () => {
+      expect(getState).to.be.a('function')
+      expect(getState()).to.eql({ counter: 0 })
     })
-  })
 
-  it('mounts the view', function() {
-    expect(root().elm.classList.contains('foo')).to.be.true
-  })
+    it('mounts the view', () =>
+      expect(document.body.firstChild.id).to.equal('counter')
+    )
 
-  it('redraws after actions are dispatched', function (done) {
-    expect(root().text).to.equal(0)
-    dispatch(add(2))
-    wait(() => {
-      expect(root().text).to.equal(2)
-      done()
-    })
-  })
-
-  it('throttles redraws', function (done) {
-    const redraw = spy()
-    root.map(redraw)
-    expect(redraw.calls.length).to.equal(1) // to initialize stream
-    dispatch(add(2))
-    dispatch(add(3))
-    wait(() => {
-      expect(redraw.calls.length).to.equal(2) // only one redraw
-      done()
-    })
-  })
-
-  it('composes event handlers with the dispatch function', function() {
-    root().elm.click()
-    expect(state()).to.equal(2)
-  })
-
-  it('runs dispatched thunk functions', function (done) {
-    const thunk = (d, s) => {
-      d(add(2))
+    it('redraws after actions are dispatched', done => {
+      const elm = document.getElementById('count')
+      expect(elm.value).to.equal('0')
+      dispatch(actions.counter.add(2))
       wait(() => {
-        expect(s()).to.equal(2)
+        expect(elm.value).to.equal('2')
         done()
       })
-    }
-    dispatch(thunk)
-  })
-
-  it('forks dispatched forkables', function (done) {
-    const forkable = Async((rej, res) => {
-      res(add(2))
-    })
-    dispatch(forkable)
-    wait(() => {
-      expect(state()).to.equal(2)
-      done()
-    })
-  })
-
-  it('runs dispatched runnables', function (done) {
-    const runnable = IO(() => add(2))
-    dispatch(runnable)
-    wait(() => {
-      expect(state()).to.equal(2)
-      done()
-    })
-  })
-
-  it('resolves dispatched thenables', function (done) {
-    const thenable = new Promise(res => res(add(2)))
-    dispatch(thenable)
-    wait(() => {
-      expect(state()).to.equal(2)
-      done()
-    })
-  })
-
-  it('maps over dispatched functors', function() {
-    dispatch([ add(2), add(3) ])
-    expect(state()).to.equal(5)
-  })
-
-  describe('when a forkable payload is resolved', function() {
-    beforeEach(function() {
-      dispatch(add(Async((rej, res) => res(2))))
     })
 
-    it('dispatches a new action with resolved value', function() {
-      expect(state()).to.equal(2)
-    })
-  })
-
-  describe('when a forkable payload is rejected', function() {
-    const err = new Error('an error')
-
-    beforeEach(function() {
-      dispatch(add(Async(rej => rej(err))))
+    it('throttles redraws', done => {
+      expect(redraw.calls.length).to.equal(1)
+      dispatch(actions.counter.add(2))
+      dispatch(actions.counter.add(2))
+      wait(() => {
+        expect(redraw.calls.length).to.equal(2)
+        done()
+      })
     })
 
-    it('dispatches a matching error action', function() {
-      expect(state()).to.equal(err)
-    })
-  })
-
-  describe('when a runnable payload is supplied', function() {
-    beforeEach(function() {
-      dispatch(add(IO(() => 2)))
-    })
-
-    it('runs and dispatches a new action with the result', function() {
-      expect(state()).to.equal(2)
-    })
-  })
-
-  describe('when a thenable payload is resolved', function() {
-    beforeEach(function (done) {
-      dispatch(add(new Promise(res => res(2))))
-      wait(done)
-    })
-
-    it('dispatches a new action with the resolved value', function() {
-      expect(state()).to.equal(2)
-    })
-  })
-
-  describe('when a thenable payload is rejected', function() {
-    const err = new Error('an error')
-
-    beforeEach(function (done) {
-      dispatch(add(new Promise((res, rej) => rej(err))))
-      wait(done)
-    })
-
-    it('dispatches a matching error action', function() {
-      expect(state()).to.equal(err)
-    })
-  })
-
-  describe('when called without a reducer', function() {
-    beforeEach(function (done) {
-      const elm = document.createElement('div')
-      const res = mount(elm, view)
-      root  = res.root
-      state = res.state
-      expect(state()).to.be.undefined
-      wait(done)
-    })
-
-    it('defaults the reducer to Identity', function() {
-      root().elm.click()
-      expect(state()).to.be.undefined
+    it('composes actions with dispatch', () => {
+      const elm = document.getElementById('count')
+      expect(elm.value).to.equal('0')
+      document.getElementById('plus').click()
+      wait(() => {
+        expect(elm.value).to.equal('0')
+        done()
+      })
     })
   })
 })
