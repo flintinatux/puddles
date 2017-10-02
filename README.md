@@ -16,45 +16,53 @@ With `puddles` you get all of these right out-of-the-box:
 
 - curried [action creators](https://github.com/flintinatux/puddles/blob/master/docs/API.md#paction)
 - switch-free [reducer construction](https://github.com/flintinatux/puddles/blob/master/docs/API.md#phandle)
-- dead simple [reducer composition](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pcombine)
+- dead simple [reducer composition](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pmount)
 - pure view functions in [plain javascript](https://github.com/flintinatux/puddles/blob/master/docs/API.md#p)
-- hash-based [client-side routing](https://github.com/flintinatux/puddles/blob/master/docs/API.md#proute)
-- native support for [asynchronous actions](https://github.com/flintinatux/puddles/blob/master/docs/API.md#paction)
+- modern [client-side routing](https://github.com/flintinatux/puddles/blob/master/docs/API.md#proute) with `history.pushState`
+- native support for [thunks](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pmount)
 - [automatically dispatched](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pmount) user actions
-- integration with the [Redux DevTools extension](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pdevtools)
+- integration with the [Redux DevTools extension](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pmount)
 
 To whet your appetite, try the obligatory Hello World example:
 
 ```js
-const compose = require('ramda/src/compose')
-const merge   = require('ramda/src/merge')
-const p       = require('puddles')
-const path    = require('ramda/src/path')
+const { compose, constant, merge, path } = require('tinyfunk')
+const p = require('puddles')
 
-const init = { name: 'world' }
+const actions = {
+  reset:   constant(p.action('RESET', null)),
+  setName: p.action('SET_NAME')
+}
 
-const reducer = p.handle(init, {
-  SET_NAME: (state, name) => merge(state, { name })
-})
-
-const setName = p.action('SET_NAME')
+const reducers = {
+  name: p.handle('world', {
+    RESET:    constant('world'),
+    SET_NAME: (state, name) => merge(state, { name })
+  })
+}
 
 const targetVal = path(['target', 'value'])
 
-const view = state =>
-  p('div#root', [
-    p('div.greeting', `Hello ${state.name}!`),
+const view = (actions, state) => {
+  const { reset, setName } = actions
+  const { name } = state
+
+  return p('div#root', [
+    p('div.greeting', `Hello ${name}!`),
 
     p('input.name', {
       attrs: { placeholder: 'Enter name...' },
       on: { input: compose(setName, targetVal) },
-      props: { value: state.name }
-    })
+      props: { value: name }
+    }),
+
+    p('button.reset', { on: { click: reset } }, 'Reset')
   ])
+}
 
 const root = document.body.querySelector('#root')
 
-p.mount(root, view, reducer)
+p.mount(actions, reducers, root, view)
 ```
 
 Notice anything missing?  There is no `dispatch` function!  The `setName` action creator attached to the `input` event is composed with the `dispatch` function internally.
