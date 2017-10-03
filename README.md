@@ -60,7 +60,7 @@ const view = (actions, state) => {
   ])
 }
 
-const root = document.body.querySelector('#root')
+const root = document.getElementById('root')
 
 p.mount(actions, reducers, root, view)
 ```
