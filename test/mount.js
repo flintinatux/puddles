@@ -82,6 +82,7 @@ describe('p.mount', () => {
   afterEach(() => {
     redraw.reset()
     store.teardown()
+    document.body.innerHTML = ''
   })
 
   describe('with minimal options', () => {
