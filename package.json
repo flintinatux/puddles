@@ -45,6 +45,7 @@
     "browserify": "^13.1.0",
     "buble": "^0.16.0",
     "chai": "^3.5.0",
+    "coveralls": "^3.0.0",
     "crocks": "^0.7.1",
     "eslint": "^4.6.1",
     "jsdom": "^9.12.0",
