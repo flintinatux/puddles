@@ -6,6 +6,9 @@ module.exports = {
     'node': true
   },
   'extends': 'eslint:recommended',
+  'globals': {
+    '__REDUX_DEVTOOLS_EXTENSION__': true
+  },
   'parserOptions': {
     'sourceType': 'module'
   },

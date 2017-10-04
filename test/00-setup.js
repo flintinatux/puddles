@@ -1,6 +1,12 @@
-require('raf').polyfill()
 const { jsdom } = require('jsdom')
+const spy       = require('@articulate/spy')
 const URL       = require('url')
+
+global.__REDUX_DEVTOOLS_EXTENSION__ = {
+  connect: spy(),
+  init:    spy(),
+  send:    spy()
+}
 
 global.document = jsdom()
 
@@ -35,6 +41,12 @@ global.location = {
   }
 }
 
-beforeEach(function() {
+beforeEach(() =>
   location.href = '/'
+)
+
+afterEach(() => {
+  global.__REDUX_DEVTOOLS_EXTENSION__.connect.reset()
+  global.__REDUX_DEVTOOLS_EXTENSION__.init.reset()
+  global.__REDUX_DEVTOOLS_EXTENSION__.send.reset()
 })

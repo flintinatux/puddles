@@ -1,6 +1,6 @@
-const { expect } = require('chai')
-const promise    = require('redux-promise')
-const spy        = require('@articulate/spy')
+const { expect }   = require('chai')
+const promise      = require('redux-promise')
+const spy          = require('@articulate/spy')
 
 const p = require('..')
 
@@ -84,6 +84,17 @@ describe('p.mount', () => {
     store.teardown()
   })
 
+  describe('with minimal options', () => {
+    beforeEach(done => {
+      store = p.mount({ root, view: Home })
+      wait(done)
+    })
+
+    it('mounts the view', () =>
+      expect(document.getElementById('home')).to.exist
+    )
+  })
+
   describe('with basic options', () => {
     beforeEach(done => {
       store = p.mount({ actions, reducers, root, view: Counter })
@@ -150,6 +161,43 @@ describe('p.mount', () => {
       dispatch(actions.counter.thunk(5))
       expect(getState().counter).to.equal(5)
     })
+
+    it('connects to the DevTools extension', () =>
+      expect(__REDUX_DEVTOOLS_EXTENSION__.connect.calls.length).to.equal(1)
+    )
+
+    it('inits the DevTools with the initial state', () =>
+      expect(__REDUX_DEVTOOLS_EXTENSION__.init.calls[0])
+        .to.eql([{ counter: 0 }])
+    )
+
+    it('sends action and state updates to the DevTools on dispatch', () => {
+      store.dispatch(actions.counter.add(2))
+      expect(__REDUX_DEVTOOLS_EXTENSION__.send.calls[0]).to.eql([
+        { type: 'ADD', payload: 2 },
+        { counter: 2 }
+      ])
+    })
+  })
+
+  describe('when dev: false', () => {
+    beforeEach(done => {
+      store = p.mount({ actions, dev: false, reducers, root, view: Counter })
+      wait(done)
+    })
+
+    it('does not connect to the DevTools extension', () =>
+      expect(__REDUX_DEVTOOLS_EXTENSION__.connect.calls.length).to.equal(0)
+    )
+
+    it('does not init the DevTools with the initial state', () =>
+      expect(__REDUX_DEVTOOLS_EXTENSION__.init.calls.length).to.equal(0)
+    )
+
+    it('does not send any updates to the DevTools on dispatch', () => {
+      store.dispatch(actions.counter.add(2))
+      expect(__REDUX_DEVTOOLS_EXTENSION__.send.calls.length).to.equal(0)
+    })
   })
 
   describe('with additional middleware', () => {
@@ -205,6 +253,19 @@ describe('p.mount', () => {
       })
     })
 
+    it('does not pushState if already there', done => {
+      const { pushState } = history
+      history.pushState = spy()
+      document.getElementById('link-home').click()
+      wait(() => {
+        expect(history.pushState.calls.length).to.equal(0)
+        expect(location.href).to.equal('/')
+        expect(document.getElementById('home')).to.exist
+        history.pushState = pushState
+        done()
+      })
+    })
+
     it('parses route params', done => {
       document.getElementById('link-detail').click()
       wait(() => {
@@ -238,6 +299,32 @@ describe('p.mount', () => {
           done()
         })
       })
+    })
+  })
+
+  describe('when route not found', () => {
+    let error
+
+    const routes = {
+      '/':        Layout(Home),
+      '/counter': Layout(Counter),
+      '/foo/:id': Layout(Detail)
+    }
+
+    beforeEach(done => {
+      error = console.error
+      console.error = spy()
+      location.href = '/bad'
+      store = p.mount({ actions, reducers, root, routes })
+      wait(done)
+    })
+
+    afterEach(() =>
+      console.error = error
+    )
+
+    it('logs an error', () => {
+      expect(console.error.calls[0]).to.eql(['Route not found: %s', '/bad'])
     })
   })
 })
