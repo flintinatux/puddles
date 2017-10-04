@@ -174,22 +174,32 @@ p.mount : Object -> Object
 
 #### Options
 
+Each of the options below is explained further in the [Getting started guide]().
+
 | Options | Type | Default | Description |
 | ------- | ---- | ------- | ----------- |
-| `actions` | `Object` | `{}` | Deeply nested map of action creators |
-| `dev` | `Boolean` | `true` | Enable/disable integration with Redux DevTools extension |
-| `middleware` | `Array` | `[]` | List of Redux middleware (`thunk` already included) |
-| `reducers` | `Object` | `{}` | Map of namespaced reducers |
-| `root` | `Element` |  | Root DOM element in which to mount the app |
-| `routes` | `Object` |  | Map of route patterns to pure view functions |
-| `view` | `Function` |  | Pure view function mapping application state to a Vnode tree |
+| [`actions`]() | `Object` | `{}` | deeply nested map of action creators |
+| [`dev`]() | `Boolean` | `true` | enable/disable integration with Redux DevTools extension |
+| [`middleware`]() | `Array` | `[]` | list of Redux middleware (`thunk` already included) |
+| [`reducers`]() | `Object` | `{}` | map of namespaced reducers |
+| [`root`]() | `Element` |  | root DOM element in which to mount the app |
+| [`routes`]() | `Object` |  | map of route patterns to pure view functions |
+| [`view`]() | `Function` |  | pure view function that maps application state to a Vnode tree |
+
+**Note:**  The [`root`]() option is required, and you must also pass either a map of [`routes`]() or a single top-level [`view`]().  All other options have safe defaults.
 
 #### Returns
 
 - Object <br/>
-  The Redux "store", with `dispatch`, `getState`, and `teardown` functions.
+  The Redux `store`, with `dispatch`, `getState`, and `teardown` functions.
 
-TODO: details
+Mounts your `puddles` app into the DOM and starts the Redux cycle.  Handles dispatching, routing, and redrawing for you.
+
+The returned `store` has `dispatch` and `getState` functions that perform just like their traditional Redux counterparts.  The `store` also exposes a `teardown` function, which will:
+
+- remove all elements inside the `root`,
+- remove the `'popstate'` event listener for routing, and
+- disable any further actions from being dispatched.
 
 See also [`p`](#p).
 
@@ -230,9 +240,12 @@ const view = (actions, state) => {
 
 const root = document.getElementById('root')
 
-const { dispatch } = p.mount(actions, reducers, root, view)
+const { dispatch, teardown } = p.mount(actions, reducers, root, view)
 
-// One of my favorite tricks...
+// One of my favorite tricks
 const socket = require('socket.io-client')()
 socket.on('action', dispatch)
+
+// Later, if you want to destroy the app
+teardown()
 ```
