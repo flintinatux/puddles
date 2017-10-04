@@ -7,7 +7,7 @@
   "main": "server/index.js",
   "scripts": {
     "clean": "rm -rf dist && mkdir -p dist",
-    "prewatch": "yarn clean",
+    "prewatch": "yarn run clean",
     "start": "nodemon -w server",
     "watch": "watchify client/app.js -d -v -o 'exorcist dist/app.js.map > dist/app.js'"
   },

@@ -2,32 +2,39 @@
   "name": "puddles",
   "version": "1.0.1",
   "description": "Tiny turnkey Redux vdom app framework",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/flintinatux/puddles.git"
-  },
+  "repository": "git@github.com:flintinatux/puddles.git",
   "keywords": [
     "framework",
     "redux",
     "snabbdom",
     "vdom"
   ],
+  "main": "index.js",
   "author": "flintinatux",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/flintinatux/puddles/issues"
+  "nyc": {
+    "check-coverage": true,
+    "include": [
+      "index.js",
+      "lib/**/*.js"
+    ],
+    "branches": 100,
+    "functions": 100,
+    "lines": 100,
+    "statements": 100
   },
-  "homepage": "https://github.com/flintinatux/puddles#readme",
-  "main": "index.js",
   "scripts": {
     "build": "browserify -s p index.js | buble > dist/puddles.js",
     "clean": "rm -rf dist && mkdir -p dist",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
     "lint": "eslint demo/client lib test index.js",
     "postbuild": "uglifyjs dist/puddles.js -cm > dist/puddles.min.js",
     "postversion": "git push --tags origin master",
     "prebuild": "yarn run clean && yarn run lint",
     "preversion": "git checkout master && yarn run build",
-    "test": "mocha --reporter dot"
+    "test": "mocha --reporter dot",
+    "test:ci": "yarn run lint && yarn run test:coverage && yarn run coverage",
+    "test:coverage": "nyc yarn run test"
   },
   "dependencies": {
     "snabbdom": "^0.7.0",
@@ -42,6 +49,7 @@
     "eslint": "^4.6.1",
     "jsdom": "^9.12.0",
     "mocha": "^3.1.2",
+    "nyc": "^11.2.1",
     "raf": "^3.3.0",
     "ramda": "^0.24.1",
     "redux-promise": "^0.5.3",

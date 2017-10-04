@@ -1,6 +1,6 @@
+*.log
+.DS_Store
+.nyc_output
+.yarn*
 dist
 node_modules
-
-.DS_Store
-.env
-*.log
