@@ -2,7 +2,7 @@
   <a href="#"><img src="https://cloud.githubusercontent.com/assets/888052/21037000/31cc30c0-bd98-11e6-9f9e-16faabfb1c25.png" alt="puddles" style="max-width:100%;"></a>
 </p>
 <p align="center">
-  Tiny turnkey Redux vdom app framework.
+  Tiny turnkey vdom app framework. Pure Redux. No boilerplate.
 </p>
 <p align="center">
   <a href="https://www.npmjs.com/package/puddles">
@@ -14,6 +14,7 @@
   <a href="https://travis-ci.org/flintinatux/puddles">
     <img src="https://travis-ci.org/flintinatux/puddles.svg?branch=master" alt="Build Status" style="max-width:100%;">
   </a>
+  <br />
   <a href="https://coveralls.io/github/flintinatux/puddles?branch=master">
     <img src="https://coveralls.io/repos/github/flintinatux/puddles/badge.svg?branch=master" alt="Coverage Status" style="max-width:100%;">
   </a>
