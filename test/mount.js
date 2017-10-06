@@ -52,10 +52,11 @@ describe('p.mount', () => {
   const Layout = Child => (actions, state) =>
     p('div#layout', [
       p('div.nav', [
-        p('a#link-home',    { link: { href: '/'        } }, 'Home'),
-        p('a#link-counter', { link: { href: '/counter' } }, 'Counter'),
-        p('a#link-detail',  { link: { href: '/foo/123' } }, 'Detail'),
-        p('a#link-bad',     { link: { href: '/bad'     } }, 'Bad')
+        p('a#link-home',    { attrs: { href: '/'           } }, 'Home'),
+        p('a#link-counter', { attrs: { href: '/counter'    } }, 'Counter'),
+        p('a#link-detail',  { attrs: { href: '/foo/123'    } }, 'Detail'),
+        p('a#link-bad',     { attrs: { href: '/bad'        } }, 'Bad'),
+        p('a#link-full',    { attrs: { href: '//localhost' } }, 'Full')
       ]),
       p('div.content', [
         Child(actions, state)
@@ -257,7 +258,7 @@ describe('p.mount', () => {
     it('does not pushState if already there', done => {
       const { pushState } = history
       history.pushState = spy()
-      document.getElementById('link-home').click()
+      document.getElementById('link-full').click()
       wait(() => {
         expect(history.pushState.calls.length).to.equal(0)
         expect(location.href).to.equal('/')

@@ -22,6 +22,8 @@ global.history = {
 }
 
 global.location = {
+  host: 'localhost',
+
   get href() {
     return this._href
   },
