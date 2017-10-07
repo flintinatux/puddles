@@ -1,17 +1,15 @@
 <p align="center">
-  <a href="#">
-    <img src="https://user-images.githubusercontent.com/888052/31304037-9a1d36ba-aae6-11e7-913e-8cb5d61c561a.png" alt="puddles" style="max-width:100%;">
-  </a>
+  <a href="#"><img src="https://user-images.githubusercontent.com/888052/31304037-9a1d36ba-aae6-11e7-913e-8cb5d61c561a.png" alt="puddles" style="max-width:100%;"></a>
 </p>
 <p align="center">
   Pure Redux. No boilerplate.
 </p>
 <p align="center">
-  <a href="https://www.npmjs.com/package/puddles"><img src="https://img.shields.io/npm/v/puddles.svg" alt="npm version" title="npm version" style="max-width:100%;"></a>
+  <a href="https://www.npmjs.com/package/puddles"><img src="https://img.shields.io/npm/v/puddles.svg" alt="npm version" style="max-width:100%;"></a>
   <a href="https://www.npmjs.com/package/puddles"><img src="https://img.shields.io/npm/dm/puddles.svg" alt="npm downloads" style="max-width:100%;"></a>
   <a href="https://nodesecurity.io/orgs/flintinatux/projects/3e6d861b-5dcc-449c-a606-37a8390a5d3e"><img src="https://nodesecurity.io/orgs/flintinatux/projects/3e6d861b-5dcc-449c-a606-37a8390a5d3e/badge" alt="NSP Status" style="max-width:100%;"></a>
   <br />
-  <a href="#"><img src="https://img.shields.io/badge/size-6.28%20kB-brightgreen.svg" alt="gzip-size" style="max-width:100%;"></a>
+  <a href="#"><img src="https://img.shields.io/badge/size-6.28%20kB-blue.svg" alt="gzip-size" style="max-width:100%;"></a>
   <a href="https://travis-ci.org/flintinatux/puddles"><img src="https://travis-ci.org/flintinatux/puddles.svg?branch=master" alt="Build Status" style="max-width:100%;"></a>
   <a href="https://coveralls.io/github/flintinatux/puddles?branch=master"><img src="https://coveralls.io/repos/github/flintinatux/puddles/badge.svg?branch=master" alt="Coverage Status" style="max-width:100%;"></a>
 </p>
