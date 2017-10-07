@@ -1,8 +1,8 @@
 <p align="center">
-  <a href="#"><img src="https://cloud.githubusercontent.com/assets/888052/21037000/31cc30c0-bd98-11e6-9f9e-16faabfb1c25.png" alt="puddles" style="max-width:100%;"></a>
+  <a href="#"><img src="https://user-images.githubusercontent.com/888052/31304037-9a1d36ba-aae6-11e7-913e-8cb5d61c561a.png" alt="puddles" style="max-width:100%;"></a>
 </p>
 <p align="center">
-  Tiny turnkey vdom app framework. Pure Redux. No boilerplate.
+  Tiny vdom app framework. Pure Redux. No boilerplate.
 </p>
 <p align="center">
   <a href="https://www.npmjs.com/package/puddles">
