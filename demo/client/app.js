@@ -2,7 +2,7 @@ const p = require('../..')
 
 const { actions, reducers } = require('./ducks')
 
-const root = document.body.querySelector('#root')
+const root = document.getElementById('root')
 
 const routes = {
   '/':        require('./views/hello'),

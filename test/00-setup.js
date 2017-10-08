@@ -2,15 +2,16 @@ const { jsdom } = require('jsdom')
 const spy       = require('@articulate/spy')
 const URL       = require('url')
 
-global.__REDUX_DEVTOOLS_EXTENSION__ = {
+const DevTools = {
   connect: spy(),
   init:    spy(),
   send:    spy()
 }
 
-global.document = jsdom()
+global.__REDUX_DEVTOOLS_EXTENSION__ = DevTools
 
-const window = document.defaultView
+global.document            = jsdom()
+const window               = document.defaultView
 global.addEventListener    = window.addEventListener.bind(window)
 global.dispatchEvent       = window.dispatchEvent.bind(window)
 global.removeEventListener = window.removeEventListener.bind(window)
@@ -22,24 +23,16 @@ global.history = {
 }
 
 global.location = {
-  host: 'localhost',
-
-  get href() {
-    return this._href
-  },
-
-  set href(href) {
-    return this._href = href
-  },
-
+  host:   'localhost',
+  href:   '/',
   origin: '',
 
   get pathname() {
-    return URL.parse(this._href).pathname || '/'
+    return URL.parse(this.href).pathname || '/'
   },
 
   get search() {
-    return URL.parse(this._href).search || ''
+    return URL.parse(this.href).search || ''
   }
 }
 
@@ -48,7 +41,7 @@ beforeEach(() =>
 )
 
 afterEach(() => {
-  global.__REDUX_DEVTOOLS_EXTENSION__.connect.reset()
-  global.__REDUX_DEVTOOLS_EXTENSION__.init.reset()
-  global.__REDUX_DEVTOOLS_EXTENSION__.send.reset()
+  DevTools.connect.reset()
+  DevTools.init.reset()
+  DevTools.send.reset()
 })

@@ -240,7 +240,7 @@ const view = (actions, state) => {
 
 const root = document.getElementById('root')
 
-const { dispatch, teardown } = p.mount(actions, reducers, root, view)
+const { dispatch, teardown } = p.mount({ actions, reducers, root, view })
 
 // One of my favorite tricks
 const socket = require('socket.io-client')()

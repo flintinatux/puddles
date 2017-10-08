@@ -68,7 +68,7 @@ const view = (actions, state) => {
 
 const root = document.getElementById('root')
 
-p.mount(actions, reducers, root, view)
+p.mount({ actions, reducers, root, view })
 ```
 
 Notice anything missing?  There is no `dispatch` function!  The `setName` action creator attached to the `input` event is composed with the `dispatch` function internally.
