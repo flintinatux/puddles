@@ -1,0 +1,24 @@
+{
+  "name": "puddles-demo",
+  "version": "0.0.0",
+  "description": "Puddles demo",
+  "author": "flintinatux",
+  "license": "MIT",
+  "main": "server/index.js",
+  "scripts": {
+    "clean": "rm -rf dist && mkdir -p dist",
+    "prewatch": "yarn run clean",
+    "start": "nodemon -w server",
+    "watch": "watchify client/app.js -d -v -o 'exorcist dist/app.js.map > dist/app.js'"
+  },
+  "dependencies": {
+    "paperplane": "^1.0.2",
+    "pug": "^2.0.0-rc.4",
+    "tinyfunk": "^0.2.1"
+  },
+  "devDependencies": {
+    "exorcist": "^0.4.0",
+    "nodemon": "^1.12.1",
+    "watchify": "^3.9.0"
+  }
+}

@@ -1,11 +1,15 @@
 assets
+demo
+docs
 node_modules
 test
 
+*.log
 .DS_Store
 .env
-.jshintrc
-.jshintignore
+.eslintrc.js
+.gitignore
+.npmignore
 .travis.yml
-*.log
+README.md
 yarn.lock
