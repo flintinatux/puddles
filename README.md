@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/puddles"><img src="https://img.shields.io/npm/v/puddles.svg" alt="npm version" style="max-width:100%;"></a>
   <a href="https://www.npmjs.com/package/puddles"><img src="https://img.shields.io/npm/dm/puddles.svg" alt="npm downloads" style="max-width:100%;"></a>
-  <a href="#"><img src="https://img.shields.io/badge/size-6.28%20kB-blue.svg" alt="gzip-size" style="max-width:100%;"></a>
+  <a href="#"><img src="https://img.shields.io/badge/size-6.34%20kB-blue.svg" alt="gzip-size" style="max-width:100%;"></a>
   <br />
   <a href="https://travis-ci.org/flintinatux/puddles"><img src="https://travis-ci.org/flintinatux/puddles.svg?branch=master" alt="Build Status" style="max-width:100%;"></a>
   <a href="https://coveralls.io/github/flintinatux/puddles?branch=master"><img src="https://coveralls.io/repos/github/flintinatux/puddles/badge.svg?branch=master" alt="Coverage Status" style="max-width:100%;"></a>
