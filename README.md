@@ -18,13 +18,13 @@
 
 The main goal of `puddles` is to make the [Redux](http://redux.js.org/) pattern easy, without all of the boilerplate.  If you like the Redux pattern, but wish you could code it in a more functional style, then `puddles` is for you.
 
-With `puddles` you get all of these right out-of-the-box:
+With `puddles` you get all of these for free:
 
 - curried [action creators](https://github.com/flintinatux/puddles/blob/master/docs/API.md#paction)
 - switch-free [reducer construction](https://github.com/flintinatux/puddles/blob/master/docs/API.md#phandle)
 - dead simple [reducer composition](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pmount)
 - pure view functions in [plain javascript](https://github.com/flintinatux/puddles/blob/master/docs/API.md#p)
-- modern [client-side routing](https://github.com/flintinatux/puddles/blob/master/docs/API.md#proute) with `history.pushState`
+- modern [client-side routing](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pmount) with `history.pushState`
 - native support for [thunks](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pmount)
 - [automatically dispatched](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pmount) user actions
 - integration with the [Redux DevTools extension](https://github.com/flintinatux/puddles/blob/master/docs/API.md#pmount)
