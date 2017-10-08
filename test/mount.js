@@ -120,6 +120,8 @@ describe('p.mount', () => {
       expect(store.teardown).to.be.a('function')
       store.teardown()
       expect(document.getElementById('counter')).not.to.exist
+      const unsub = __REDUX_DEVTOOLS_EXTENSION__
+      expect(unsub.calls.length).to.equal(1)
       dispatch(actions.counter.add(2))
       expect(getState()).to.eql({ counter: 0 })
     })
@@ -172,6 +174,18 @@ describe('p.mount', () => {
       expect(__REDUX_DEVTOOLS_EXTENSION__.init.calls[0])
         .to.eql([{ counter: 0 }])
     )
+
+    it('subscribes to DevTools time travel messages', done => {
+      const elm = document.getElementById('count')
+      expect(elm.value).to.equal('0')
+      const timeTravel = __REDUX_DEVTOOLS_EXTENSION__.subscribe.calls[0][0]
+      timeTravel({ type: 'SHRUG' })
+      timeTravel({ type: 'DISPATCH', state: JSON.stringify({ counter: 4 }) })
+      wait(() => {
+        expect(elm.value).to.equal('4')
+        done()
+      })
+    })
 
     it('sends action and state updates to the DevTools on dispatch', () => {
       store.dispatch(actions.counter.add(2))

@@ -2,11 +2,12 @@ const { jsdom } = require('jsdom')
 const spy       = require('@articulate/spy')
 const URL       = require('url')
 
-const DevTools = {
-  connect: spy(),
-  init:    spy(),
-  send:    spy()
-}
+const DevTools = Object.assign(spy(), {
+  connect:   spy(),
+  init:      spy(),
+  send:      spy(),
+  subscribe: spy()
+})
 
 global.__REDUX_DEVTOOLS_EXTENSION__ = DevTools
 
@@ -41,7 +42,9 @@ beforeEach(() =>
 )
 
 afterEach(() => {
+  DevTools.reset()
   DevTools.connect.reset()
   DevTools.init.reset()
   DevTools.send.reset()
+  DevTools.subscribe.reset()
 })
