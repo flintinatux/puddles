@@ -28,7 +28,7 @@
     "clean": "rm -rf dist && mkdir -p dist",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "lint": "eslint demo/client lib test index.js",
-    "postbuild": "uglifyjs dist/puddles.js -cm > dist/puddles.min.js",
+    "postbuild": "uglifyjs dist/puddles.js -cm > dist/puddles.min.js && gzip-size dist/puddles.min.js",
     "postversion": "git push --tags origin master",
     "prebuild": "yarn run clean && yarn run lint",
     "preversion": "git checkout master && yarn run build",
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "snabbdom": "^0.7.0",
-    "tinyfunk": "^1.0.0"
+    "tinyfunk": "^1.1.0"
   },
   "devDependencies": {
     "@articulate/spy": "^0.0.1",
