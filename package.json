@@ -37,8 +37,8 @@
     "test:coverage": "nyc yarn run test"
   },
   "dependencies": {
-    "snabbdom": "^0.7.0",
-    "tinyfunk": "^1.1.0"
+    "snabbdom": "^0.7.1",
+    "tinyfunk": "^1.2.0"
   },
   "devDependencies": {
     "@articulate/spy": "^0.0.1",

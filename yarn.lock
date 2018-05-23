@@ -2684,9 +2684,9 @@ slide@^1.1.5:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/slide/-/slide-1.1.6.tgz#56eb027d65b4d2dce6cb2e2d32c4d4afc9e1d707"
 
-snabbdom@^0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/snabbdom/-/snabbdom-0.7.0.tgz#c09e2baa0f8d43d306a3aa7502b62fdde2b4154e"
+snabbdom@^0.7.1:
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/snabbdom/-/snabbdom-0.7.1.tgz#c1e9eddfad2c02ebc2cf66aaefb040419d059597"
 
 sntp@1.x.x:
   version "1.0.9"
@@ -2928,9 +2928,9 @@ timers-browserify@^1.0.1:
   dependencies:
     process "~0.11.0"
 
-tinyfunk@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/tinyfunk/-/tinyfunk-1.1.0.tgz#671b584807a60ea7d5139c99ee5b4d973c0beb72"
+tinyfunk@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/tinyfunk/-/tinyfunk-1.2.0.tgz#c918dae8f79de0e0740b1dd38da598547fc1bfca"
 
 tmp@^0.0.31:
   version "0.0.31"
