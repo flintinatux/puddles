@@ -10,6 +10,7 @@
     "vdom"
   ],
   "main": "index.js",
+  "unpkg": "dist/puddles.min.js",
   "author": "flintinatux",
   "license": "MIT",
   "nyc": {
@@ -38,7 +39,7 @@
   },
   "dependencies": {
     "snabbdom": "^0.7.1",
-    "tinyfunk": "^1.2.0"
+    "tinyfunk": "^1.2.2"
   },
   "devDependencies": {
     "@articulate/spy": "^0.0.1",
