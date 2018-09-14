@@ -1,6 +1,6 @@
 {
   "name": "puddles",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "Tiny vdom app framework. Pure Redux. No boilerplate.",
   "repository": "git@github.com:flintinatux/puddles.git",
   "keywords": [
