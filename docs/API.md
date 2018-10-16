@@ -13,7 +13,7 @@ The `puddles` api has a small surface-area by design, and was inspired by other 
 ### p
 
 ```haskell
-p : (String, Object, [Vnode]) -> Vnode
+p :: (String, Object, [Vnode]) -> Vnode
 ```
 
 #### Parameters
@@ -59,7 +59,7 @@ const Cards = (actions, state) =>
 ### p.action
 
 ```haskell
-p.action : String -> a -> Action
+p.action :: String -> a -> Action
 ```
 
 #### Parameters
@@ -90,7 +90,7 @@ sendEmail({ to: 'example@email.com' })
 ### p.error
 
 ```haskell
-p.error : String -> Error -> Action
+p.error :: String -> Error -> Action
 ```
 
 #### Parameters
@@ -123,7 +123,7 @@ sendEmail(new Error('mailbox full'))
 ### p.handle
 
 ```haskell
-p.handle : a -> { k: ((a, Action) -> a) } -> (a, Action) -> a
+p.handle :: a -> { k: ((a, Action) -> a) } -> (a, Action) -> a
 ```
 
 #### Parameters
@@ -169,7 +169,7 @@ state = reducer(state, p.action('NOT_HANDLED', null))
 ### p.mount
 
 ```haskell
-p.mount : Object -> Object
+p.mount :: Object -> Object
 ```
 
 #### Options
