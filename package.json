@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "snabbdom": "^0.7.2",
-    "tinyfunk": "^1.5.0"
+    "tinyfunk": "1.x"
   },
   "devDependencies": {
     "@articulate/spy": "^0.0.1",

@@ -3407,10 +3407,10 @@ timers-browserify@^1.0.1:
   dependencies:
     process "~0.11.0"
 
-tinyfunk@^1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/tinyfunk/-/tinyfunk-1.5.0.tgz#5a2dfe72d2e09345d8758773b5cc235b6e2c11b0"
-  integrity sha512-nIQ+bF9Bo+EGyCMdxOJHwitph1oKNMp5JpMqKxHfi5GSLCb6HXw3rKwU3f0DucWCP41OQhnshixny773yRz7Cw==
+tinyfunk@1.x:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/tinyfunk/-/tinyfunk-1.7.0.tgz#2f0e9f365480a3c88572668991e20d1c36c99df6"
+  integrity sha512-w0D+M59UU7P6S2najRvJiFMn5wbOCs2tQPfNEP/9nXEx8W9d2AGO9ajaQ3qsbEQ09R86Y/65PhM9zLckf6l9bg==
 
 tmp@^0.0.31:
   version "0.0.31"
