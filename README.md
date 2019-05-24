@@ -11,8 +11,6 @@
   <br />
   <a href="https://travis-ci.org/flintinatux/puddles"><img src="https://travis-ci.org/flintinatux/puddles.svg?branch=master" alt="Build Status" style="max-width:100%;"></a>
   <a href="https://coveralls.io/github/flintinatux/puddles?branch=master"><img src="https://coveralls.io/repos/github/flintinatux/puddles/badge.svg?branch=master" alt="Coverage Status" style="max-width:100%;"></a>
-  <a href="https://nodesecurity.io/orgs/flintinatux/projects/3e6d861b-5dcc-449c-a606-37a8390a5d3e"><img src="https://nodesecurity.io/orgs/flintinatux/projects/3e6d861b-5dcc-449c-a606-37a8390a5d3e/badge" alt="NSP Status" style="max-width:100%;"></a>
-</p>
 
 ## Introduction
 
